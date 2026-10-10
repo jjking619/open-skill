@@ -1,0 +1,16 @@
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+
+# Python runtime artifacts that scripts may leave behind
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local scratch / report output (skills write these elsewhere by default)
+*.log
+tmp/
+.cache/
