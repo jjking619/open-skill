@@ -306,4 +306,3 @@ open-skill/
 
 本项目采用 [MIT License](LICENSE)。
 
-<div align="center"><sub>Built for Hermes Agent · 技能随工作流一起演进</sub></div>

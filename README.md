@@ -307,4 +307,3 @@ The layout matches the Hermes Agent skill library and the Agent Skills tap conve
 
 Released under the [MIT License](LICENSE).
 
-<div align="center"><sub>Built for Hermes Agent · skills evolve with the work</sub></div>
