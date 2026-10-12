@@ -1,0 +1,77 @@
+---
+name: shell-script-hardening
+description: "把 install.sh / 部署脚本写结实：幂等、set -euo pipefail、引号与错误处理、失败可诊断、成功不自欺。编写或评审一键安装、部署、构建脚本时使用。"
+version: 0.1.0
+author: "kane.ji, Hermes Agent"
+license: MIT
+platforms: [windows, linux, macos]
+metadata:
+  hermes:
+    tags: [shell, bash, install.sh, 幂等, 部署, 脚本]
+---
+
+# Shell 脚本健壮化（install.sh / deploy.sh）
+
+目标三条：**重复执行不坏、失败能说清、成功不自欺**。
+
+## 何时使用（When to Use）
+
+- 写或改一键安装、部署、构建脚本
+- 脚本偶发失败、重复执行报错、或「看起来成功其实没跑」
+- 评审别人仓库里的 `install.sh`（与 `github-repo-review-and-design` 的内存清单配合）
+- 不适用：一次性临时命令（直接在 shell 里跑就行）
+
+## 骨架（Skeleton）
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail          # 命令失败 / 未定义变量 / 管道失败 都退出
+IFS=$'\n\t'
+trap 'echo "[ERR] 第 $LINENO 行失败" >&2' ERR
+```
+
+## 六条纪律（Discipline）
+
+**① 幂等**
+装之前先探测：`command -v git`、`[ -d "$dir" ]`、`dpkg -s pkg`；已满足就打印 `[SKIP]` 跳过。
+不要重复 append 配置、不要每次都全量重装依赖。
+
+**② 引号与数组**
+所有变量展开加双引号：`"$var"`、`"${arr[@]}"`；命令参数用数组拼，不要字符串拼接后 eval。
+
+**③ 临时文件与清理**
+`tmp="$(mktemp -d)"` + `trap 'rm -rf "$tmp"' EXIT`；不要写死 `/tmp/xxx`（并发会打架）。
+
+**④ 失败要能诊断**
+每步打印在做什么（`echo "[STEP] 安装依赖"`）；错误信息走 stderr 并以非零码退出；最外层给出「哪一步失败 + 怎么重试」。
+
+**⑤ 不做危险默认**
+不要 `curl ... | sh`；`rm -rf` 前判断变量非空（`[ -n "$dir" ]`）；`sudo` 只在必要时用并明确提示；不要静默改系统配置。
+
+**⑥ 成功要自证**
+结尾验证**副作用**而不是只打印成功文案：产物文件存在、服务在监听（`ss -ltn` / health check）、`--version` 输出符合预期。
+
+## 自检两条（把「假成功」揪出来）
+
+**① 别信脚本自述**
+把子进程输出重定向到**不存在的目录**（`> logs/x.log` 而 `logs/` 不存在）会让子进程**根本不启动**，脚本却照样打印 "started / All done"。
+判定通过前必须核对副作用：产物文件、进程是否存活（CPU 时间是否增长）、日志是否真的写入。
+
+**② 非交互 shell 的 PATH 陷阱**
+用 `su -c`、`bash -lc`、ssh 单命令跑脚本时，目标用户的 `~/.bashrc` 常常不生效（很多发行版对非交互 shell 直接 early-return），于是 `python3` / `node` 落到另一个版本 → 报缺依赖，被误判成项目问题。
+要复现「用户在终端里跑」的效果，显式 `export PATH="$HOME/.local/bin:$PATH"` 之类，而不是加 `-l`。
+
+## 坑（Pitfalls）
+
+- **`set -e` 不等于万无一失**：`cmd || true`、命令替换、`if` 条件里的失败不会退出 —— 关键步骤要显式判断。
+- **管道隐式吞错**：`a | b` 只看最后一个命令的退出码 → 加 `set -o pipefail`。
+- **变量未引号 + 空格路径**：`rm -rf $dir` 在 `dir="a b"` 时炸得最惨。
+- **脚本自述当验收**：见上「别信脚本自述」。
+- **重复执行追加**：把配置写进 `~/.bashrc` 前先 grep 判重。
+
+## 验收（Verification）
+
+- [ ] 连续执行两次：第二次全部 `[SKIP]` 或幂等通过，无重复副作用
+- [ ] 故意制造一步失败：脚本非零退出并指出失败步骤
+- [ ] 无未加引号的展开；无固定路径临时文件；无 `curl | sh`
+- [ ] 结尾有副作用自检，而不是只 echo 成功
