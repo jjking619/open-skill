@@ -264,9 +264,12 @@ hermes skills install jjking619/open-skill/skills/project-reproduction
 open-skill/
 ├── README.md                                   # 英文门面（Agent 与 GitHub 首屏）
 ├── README.zh.md                                # 本文件：中文版
+├── CHANGELOG.md                                # 变更记录（Keep a Changelog 格式，含各技能版本）
 ├── LICENSE                                     # MIT
 ├── .gitignore
 ├── .gitattributes
+├── tools/
+│   └── check-doc-sync.sh                       # 核对 README / 已发布文档的索引与 skills/ 是否一致
 └── skills/                                     # 每个技能一个目录；目录名 = SKILL.md 的 name
     ├── code-authoring/                         #   SKILL.md（英文）+ SKILL.zh.md（中文）
     ├── github-repo-review-and-design/
@@ -292,7 +295,7 @@ open-skill/
 - **修复要固化**：临时命令不算交付，改动必须落进文件本身。
 - **坑位只收通用经验**：条目须在他人环境下也成立；环境/团队特有条目不进技能。
 - **凭据不进仓库**：密钥、token、内部标识走环境变量，仓库里只留占位符。
-- **版本语义化**：每个技能自带 `version`，破坏性流程变更升 major。
+- **版本语义化**：每个技能自带 `version`，重要变更记入 [`CHANGELOG.md`](CHANGELOG.md)（Keep a Changelog 格式）。新增或改名技能后，跑一次 `tools/check-doc-sync.sh`，让 README 与已发布文档的索引保持同步。
 
 <a id="license"></a>
 
