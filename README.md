@@ -11,6 +11,8 @@ Code authoring · repo review · project reproduction · publish gate · shell &
 [![Standard](https://img.shields.io/badge/Agent%20Skills-open%20format-0ea5e9?style=flat-square)](https://agentskills.io)
 [![License](https://img.shields.io/badge/license-MIT-16a34a?style=flat-square)](#license)
 
+**English** · [中文文档](README.zh.md)
+
 </div>
 
 > Repetitive work that still needs judgement, distilled into skills an AI agent can load and execute.
