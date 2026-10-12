@@ -2,12 +2,9 @@
 name: doc-consistency-audit
 description: "Audit a batch of documents for consistency: missing or extra sections, out-of-sync translations, broken or unencoded links, glued shell commands in code blocks, inconsistent terminology, and leftover placeholders. Produces a severity-graded report with locatable evidence. Use when reviewing a doc set or a multi-language doc tree."
 version: 0.1.0
-author: "kane.ji, Hermes Agent"
+author: "kane.ji"
 license: MIT
 platforms: [windows, linux, macos]
-metadata:
-  hermes:
-    tags: [documentation, audit, consistency, i18n, review]
 ---
 
 # Documentation Consistency Audit

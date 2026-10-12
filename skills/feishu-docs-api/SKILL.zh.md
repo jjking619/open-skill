@@ -1,5 +1,3 @@
-> 本文件为**中文版**，供人阅读；Agent 实际加载同目录的 `SKILL.md`（英文版）。两版内容对应。
-
 # 飞书云文档 REST 操作（Feishu Docs API）
 
 把「改飞书文档 / 把 md 同步上云 / 建知识库节点归档 / 读写多维表格」从一次性手工调试变成可复现流程：
@@ -16,7 +14,7 @@
 
 ## 前置（Prerequisites）
 
-- 应用凭据 `FEISHU_APP_ID` / `FEISHU_APP_SECRET`（环境变量或 `~/.hermes/.env`）→ 换 `tenant_access_token`
+- 应用凭据 `FEISHU_APP_ID` / `FEISHU_APP_SECRET`（环境变量或 `~/.env` 文件）→ 换 `tenant_access_token`
 - 应用必须被加为目标文档 / 知识库空间的协作者，权限不够会返回 131006 / 1770032（见 §4）
 - **动手前先探活**：`GET /wiki/v2/spaces/get_node?token=<wiki_token>` 返回 `code=0` 再往下做
 

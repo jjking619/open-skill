@@ -2,12 +2,9 @@
 name: feishu-docs-api
 description: "Drive Feishu/Lark cloud documents over REST (docx / wiki / bitable): read and edit blocks, publish or sync markdown, create and archive wiki nodes, manage permissions, plus verified formats, error codes, and post-write verification. Use when a task requires editing a Feishu doc, syncing markdown into one, or building knowledge-base nodes."
 version: 0.1.0
-author: "kane.ji, Hermes Agent"
+author: "kane.ji"
 license: MIT
 platforms: [windows, linux, macos]
-metadata:
-  hermes:
-    tags: [feishu, lark, docx, wiki, bitable, rest, api]
 ---
 
 # Feishu Cloud Documents over REST (Feishu Docs API)
@@ -26,7 +23,7 @@ No CLI required — plain REST plus a `tenant_access_token`.
 
 ## Prerequisites
 
-- An app with `FEISHU_APP_ID` / `FEISHU_APP_SECRET` (environment or `~/.hermes/.env`) → exchange for `tenant_access_token`
+- An app with `FEISHU_APP_ID` / `FEISHU_APP_SECRET` (environment or a `~/.env` file) → exchange for `tenant_access_token`
 - The app must be a collaborator on the target document / wiki space; insufficient permission returns `131006` or `1770032`
 - **Probe before acting**: `GET /open-apis/wiki/v2/spaces/get_node?token=<wiki_token>` must return `code=0`
 - Never hardcode tokens in scripts, documents, or logs; test with a plain docx rather than a wiki node

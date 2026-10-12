@@ -2,12 +2,9 @@
 name: project-reproduction
 description: "Reproduce or deploy a project exactly as documented: follow the README, tutorial, or install.sh step by step, keep a full trail, fix errors along the cheapest-to-most-expensive path and make fixes permanent in files, and deliver a report plus the modified files. Use when asked to reproduce, deploy, or get a project running."
 version: 0.1.0
-author: "kane.ji, Hermes Agent"
+author: "kane.ji"
 license: MIT
 platforms: [windows, linux, macos]
-metadata:
-  hermes:
-    tags: [reproduction, deploy, troubleshooting, report, verification]
 ---
 
 # Project Reproduction (follow the docs, fix, make it repeatable)
@@ -19,7 +16,8 @@ Goal: **a predictable process and a reusable result** — the next person follow
 - Reproducing, deploying, or getting a project / demo / open-source code running per its README, tutorial, or `install.sh`
 - Executing documented steps while recording each result and every deviation
 - When reproduction fails and needs systematic troubleshooting, a trail, and a deliverable
-- Not for: pure code review; fixing an already-identified single bug (`systematic-debugging`); throwaway spikes (`spike`)
+- Not for: pure code review; fixing an already-identified single bug; throwaway spikes
+- For board/device work over adb, pair this with `adb-device-toolkit` (same repo)
 
 ## Output Layout (create it before starting)
 

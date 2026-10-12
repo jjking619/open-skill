@@ -2,12 +2,9 @@
 name: prepublish-repo-audit
 description: "Pre-publish gate before open-sourcing, making a repo public, or handing it to a third party: visibility check, secret and credential scan, internal-identifier and internal-path scan, large-file and hygiene checks, history and cache residue. Run it before every publish."
 version: 0.1.0
-author: "kane.ji, Hermes Agent"
+author: "kane.ji"
 license: MIT
 platforms: [windows, linux, macos]
-metadata:
-  hermes:
-    tags: [publish, opensource, audit, security, secrets, gate]
 ---
 
 # Pre-publish Repo Audit

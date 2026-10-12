@@ -2,12 +2,9 @@
 name: adb-device-toolkit
 description: "Practical adb workflows for Android and embedded boards: identifying devices and choosing among several, execution identity (root vs regular user), file transfer with checksums, detaching long tasks from the adb session, forward vs reverse, and a troubleshooting table. Use when debugging a board or Android device over adb."
 version: 0.1.0
-author: "kane.ji, Hermes Agent"
+author: "kane.ji"
 license: MIT
 platforms: [windows, linux, macos]
-metadata:
-  hermes:
-    tags: [adb, android, embedded, board, debugging, device]
 ---
 
 # adb Device Toolkit

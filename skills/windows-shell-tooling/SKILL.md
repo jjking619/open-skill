@@ -2,12 +2,9 @@
 name: windows-shell-tooling
 description: "Running commands and writing scripts on Windows with git-bash / MSYS: unconverted paths, CRLF vs LF, backslash escaping, GBK console, pty line endings, paths with spaces. Use when script behavior is odd or native tools can't find a path."
 version: 0.1.0
-author: "kane.ji, Hermes Agent"
+author: "kane.ji"
 license: MIT
 platforms: [windows]
-metadata:
-  hermes:
-    tags: [windows, git-bash, msys, shell, encoding, paths]
 ---
 
 # Windows Shell Tooling (git-bash / MSYS)

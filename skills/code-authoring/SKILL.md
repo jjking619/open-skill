@@ -2,12 +2,9 @@
 name: code-authoring
 description: "Load before writing new code or editing code you did not just create: comment hygiene (write why, follow the file's conventions) and minimal-sufficient-diff discipline. Keeps diffs reviewable and prevents scope creep."
 version: 0.1.0
-author: "kane.ji, Hermes Agent"
+author: "kane.ji"
 license: MIT
 platforms: [windows, linux, macos]
-metadata:
-  hermes:
-    tags: [coding-standards, comments, minimal-diff, code-quality, authoring]
 ---
 
 # Code Authoring: Minimal Sufficient Diff & Comment Hygiene
@@ -18,7 +15,7 @@ metadata:
 - Before modifying code **not created in this session** (bug fixes, refactoring, tests, config-as-code).
 - Whenever the diff must stay small so "while I was in there" edits don't bury the real change.
 
-> **Not for**: pre-commit review alone (`requesting-code-review`); the TDD loop itself (`test-driven-development`); post-commit bulk cleanup (`simplify-code`); throwaway spikes (`spike`).
+> **Not for**: pre-commit review alone; the test-driven-development loop itself; post-commit bulk cleanup; throwaway spikes.
 
 > **Conflict priority**: existing project style > this skill's defaults; root-cause fix > minimal diff (if they conflict, explain first, then act); correctness/safety > brevity.
 

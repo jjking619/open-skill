@@ -1,5 +1,3 @@
-> 本文件为**中文版**，供人阅读；Agent 实际加载同目录的 `SKILL.md`（英文版）。两版内容对应。
-
 # Windows Shell 工具链坑（Windows + git-bash / MSYS）
 
 在 Windows 的 git-bash（MSYS2）里跑命令、写脚本、混调原生工具（git / node / python / rg）时的实测坑与对策。

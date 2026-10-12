@@ -2,22 +2,19 @@
 
 # open-skill
 
-**面向日常工作流的 Hermes Agent 技能集**
+**面向日常工作流的技能集**
 
 代码编写 · 仓库审查 · 项目复现 · 发布门禁 · Shell 与脚本健壮化 · 设备联调 · 云文档 API · 文档审计 · 交付物包
 
 [![Skills](https://img.shields.io/badge/skills-10-2f81f7?style=flat-square)](#skills)
-[![Agent](https://img.shields.io/badge/Hermes%20Agent-skill%20package-8b5cf6?style=flat-square)](https://hermes-agent.nousresearch.com/docs)
+[![Format](https://img.shields.io/badge/skills-plain%20markdown-8b5cf6?style=flat-square)](#skills)
 [![Standard](https://img.shields.io/badge/Agent%20Skills-open%20format-0ea5e9?style=flat-square)](https://agentskills.io)
 [![License](https://img.shields.io/badge/license-MIT-16a34a?style=flat-square)](#license)
-
-[English](README.md) · **中文**
 
 </div>
 
 > 把日常里**重复且有判断力**的活儿，沉淀成 AI Agent 可直接加载执行的技能。
 > 每个技能都是**自包含的单文件 `SKILL.md`**：触发条件、可执行流程、实测坑、验收清单写在一起 —— 没有依赖、没有隐藏资产，复制进 Agent 的技能目录即可使用。
-> 每个技能同时提供中文版 `SKILL.zh.md`（供人阅读）；Agent 实际加载的是英文 `SKILL.md`，Hermes 只认这一个文件名，两版并存不冲突。
 
 ---
 
@@ -243,23 +240,20 @@ P0 准备 ─► P1 按原文逐步执行（忠实原文，偏差记为「文档
 ## 快速开始（Quick Start）
 
 ```bash
-# 一、作为 Hermes Agent 的 tap 订阅（可随时更新）
-hermes skills tap add jjking619/open-skill
-hermes skills search reproduce --source github
-hermes skills install jjking619/open-skill/skills/project-reproduction
+# 一、克隆后把需要的技能目录复制进你所用 Agent 的技能目录
+git clone git@github.com:jjking619/open-skill.git
+cp -r open-skill/skills/*  <你的技能目录>/
 
-# 二、装到其他支持 Agent Skills 格式的客户端
+# 二、客户端支持从 GitHub 安装时
 npx skills add jjking619/open-skill
 
-# 三、整树复制进 Agent 技能目录
-git clone git@github.com:jjking619/open-skill.git
-cp -r open-skill/skills/*  ~/AppData/Local/hermes/skills/     # Windows (git-bash)
-cp -r open-skill/skills/*  ~/.hermes/skills/                  # Linux / macOS
+# 三、示例：Hermes Agent（tap 方式）
+hermes skills tap add jjking619/open-skill
+hermes skills install jjking619/open-skill/skills/project-reproduction
 ```
 
 - **无需安装依赖**：技能是纯 Markdown，命令按需在运行时执行。
-- **如何被加载**：Agent 依据每个 `SKILL.md` frontmatter 的 `description`（含触发词）判断是否加载；也可手动 `skill_view(name='code-authoring')`。
-- **中英两版**：`SKILL.md` 为英文（Agent 加载），`SKILL.zh.md` 为中文（供人阅读）；改内容时请两版同步。
+- **如何被加载**：Agent 依据每个 `SKILL.md` frontmatter 的 `description`（含触发词）判断是否加载；显式加载方式随客户端而异，见所使客户端的文档。
 - **改回自己的环境**：技能里出现的产出目录（复现报告、审计报告等落盘路径）按自己习惯改 `SKILL.md` 里的路径常量即可。
 
 <a id="layout"></a>
@@ -286,7 +280,7 @@ open-skill/
     └── deliverable-pack/
 ```
 
-目录层级同时符合 Hermes Agent 技能库与 Agent Skills 的 tap 约定（`skills/<技能名>/SKILL.md`），可**整树复制**，无需改名或调整结构。
+目录层级符合 Agent Skills 的 tap 约定（`skills/<技能名>/SKILL.md`），可**整树复制**，无需改名或调整结构。
 
 <a id="conventions"></a>
 

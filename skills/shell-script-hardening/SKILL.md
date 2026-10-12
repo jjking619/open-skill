@@ -2,12 +2,9 @@
 name: shell-script-hardening
 description: "Make install.sh and deployment scripts solid: idempotency, set -euo pipefail, quoting and error handling, diagnosable failures, and no false success. Use when writing or reviewing one-click install, deploy, or build scripts."
 version: 0.1.0
-author: "kane.ji, Hermes Agent"
+author: "kane.ji"
 license: MIT
 platforms: [windows, linux, macos]
-metadata:
-  hermes:
-    tags: [shell, bash, install-sh, idempotency, deploy, scripting]
 ---
 
 # Shell Script Hardening (install.sh / deploy.sh)

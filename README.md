@@ -2,16 +2,14 @@
 
 # open-skill
 
-**A skill pack for everyday engineering workflows — built for Hermes Agent**
+**A skill pack for everyday engineering workflows**
 
 Code authoring · repo review · project reproduction · publish gate · shell & script hardening · device debugging · cloud docs API · document audit · deliverable packs
 
 [![Skills](https://img.shields.io/badge/skills-10-2f81f7?style=flat-square)](#skills)
-[![Agent](https://img.shields.io/badge/Hermes%20Agent-skill%20package-8b5cf6?style=flat-square)](https://hermes-agent.nousresearch.com/docs)
+[![Format](https://img.shields.io/badge/skills-plain%20markdown-8b5cf6?style=flat-square)](#skills)
 [![Standard](https://img.shields.io/badge/Agent%20Skills-open%20format-0ea5e9?style=flat-square)](https://agentskills.io)
 [![License](https://img.shields.io/badge/license-MIT-16a34a?style=flat-square)](#license)
-
-**English** · [中文文档](README.zh.md)
 
 </div>
 
@@ -246,22 +244,20 @@ define scope + mirror pairs ─► mechanical scan (structure / links / code blo
 ## Quick Start
 
 ```bash
-# 1. Subscribe as a Hermes Agent tap (updatable)
-hermes skills tap add jjking619/open-skill
-hermes skills search reproduce --source github
-hermes skills install jjking619/open-skill/skills/project-reproduction
+# 1. Clone, then copy the skill folders you need into your agent's skill directory
+git clone git@github.com:jjking619/open-skill.git
+cp -r open-skill/skills/*  <your-agent-skills-dir>/
 
-# 2. Install with any Agent Skills-compatible client
+# 2. Install from the GitHub repo, if your client supports it
 npx skills add jjking619/open-skill
 
-# 3. Or copy the whole tree into the agent's skill directory
-git clone git@github.com:jjking619/open-skill.git
-cp -r open-skill/skills/*  ~/AppData/Local/hermes/skills/     # Windows (git-bash)
-cp -r open-skill/skills/*  ~/.hermes/skills/                  # Linux / macOS
+# 3. Example: Hermes Agent (tap)
+hermes skills tap add jjking619/open-skill
+hermes skills install jjking619/open-skill/skills/project-reproduction
 ```
 
 - **No dependencies**: each skill is a plain markdown file; commands run at the moment they're needed.
-- **How skills load**: the agent reads each `SKILL.md` frontmatter `description` (trigger keywords) to decide relevance; you can also load one explicitly (`skill_view(name='code-authoring')`).
+- **How skills load**: your agent reads the `description` in each `SKILL.md` frontmatter (trigger keywords) to decide relevance; how to load one explicitly differs per client — see its docs.
 - **Adapt to your environment**: output directories mentioned in a skill (report or audit paths) are plain text — edit the constant in `SKILL.md` to match your habits.
 
 <a id="layout"></a>
@@ -271,23 +267,24 @@ cp -r open-skill/skills/*  ~/.hermes/skills/                  # Linux / macOS
 ```text
 open-skill/
 ├── README.md                                   # this file: facade and usage
+├── README.zh.md                                # Chinese edition of this file
 ├── LICENSE                                     # MIT
 ├── .gitignore
 ├── .gitattributes
 └── skills/                                     # one directory per skill; the directory name equals the SKILL.md `name`
-    ├── code-authoring/SKILL.md
-    ├── github-repo-review-and-design/SKILL.md
-    ├── project-reproduction/SKILL.md
-    ├── prepublish-repo-audit/SKILL.md
-    ├── windows-shell-tooling/SKILL.md
-    ├── shell-script-hardening/SKILL.md
-    ├── adb-device-toolkit/SKILL.md
-    ├── feishu-docs-api/SKILL.md
-    ├── doc-consistency-audit/SKILL.md
-    └── deliverable-pack/SKILL.md
+    ├── code-authoring/                         # SKILL.md (English) + SKILL.zh.md (Chinese)
+    ├── github-repo-review-and-design/
+    ├── project-reproduction/
+    ├── prepublish-repo-audit/
+    ├── windows-shell-tooling/
+    ├── shell-script-hardening/
+    ├── adb-device-toolkit/
+    ├── feishu-docs-api/
+    ├── doc-consistency-audit/
+    └── deliverable-pack/
 ```
 
-The layout matches the Hermes Agent skill library and the Agent Skills tap convention (`skills/<skill-name>/SKILL.md`), so the tree can be copied wholesale without renaming anything.
+The layout follows the Agent Skills tap convention (`skills/<skill-name>/SKILL.md`), so the tree can be copied wholesale without renaming anything.
 
 <a id="conventions"></a>
 

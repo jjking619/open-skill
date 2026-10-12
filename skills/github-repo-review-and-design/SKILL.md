@@ -2,13 +2,9 @@
 name: github-repo-review-and-design
 description: "Review a whole GitHub repository and produce a graded report, or design the file structure for a new open-source demo or project. Covers repository assessment, layered code review, automated scans, release-readiness checks, and layout templates. Use for repo triage, selection, or project scaffolding."
 version: 1.1.2
-author: Hermes Agent
+author: "kane.ji"
 license: MIT
 platforms: [windows, linux, macos]
-metadata:
-  hermes:
-    tags: [github, code-review, repository, file-design, triage, scaffolding]
-    related_skills: [github-code-review, github-repo-management, requesting-code-review]
 ---
 
 # GitHub Repo Review & File Design
@@ -25,7 +21,7 @@ One skill, two workflows sharing the same "locate the repo + decide the mode" pr
 - Repository file-structure design for a new project or demo
 - Reorganisation plan for a messy legacy repo
 
-Route elsewhere: PR/diff-level review and inline PR comments → `github-code-review`; pre-commit self-review of your own small change → `requesting-code-review`; LOC/language stats only → `codebase-analysis` tooling (`pygount` is used inside A1 here).
+Route elsewhere: PR/diff-level review and inline PR comments; pre-commit self-review of your own small change; LOC/language statistics only (`pygount` is used inside A1 here).
 
 ## Prerequisites
 

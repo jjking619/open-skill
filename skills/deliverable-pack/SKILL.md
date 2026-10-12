@@ -2,12 +2,9 @@
 name: deliverable-pack
 description: "Turn one-off work into a reviewable deliverable pack: a human-facing overview, a structured main report, an append-as-you-go execution log, a problem-and-fix ledger, and raw snapshots. Use for reproduction, migration, audit, and research work that must be handed over."
 version: 0.1.0
-author: "kane.ji, Hermes Agent"
+author: "kane.ji"
 license: MIT
 platforms: [windows, linux, macos]
-metadata:
-  hermes:
-    tags: [deliverable, report, handover, audit-trail, documentation]
 ---
 
 # Deliverable Pack
