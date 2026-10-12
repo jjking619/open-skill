@@ -104,7 +104,8 @@ else:
                 if not cb:
                     continue
                 inner = (cb.get('children') or [None])[0]
-                txt = btext(byid[inner]).strip() if inner in byid else ''
+                # cell text may be plain, backticked or wrapped in a link — normalise before matching
+                txt = btext(byid[inner]).strip().strip('`').strip() if inner in byid else ''
                 m = re.match(r'^([a-z0-9][a-z0-9-]*)\b', txt)
                 if m and m.group(1) in skills:
                     found.add(m.group(1))
