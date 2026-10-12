@@ -1,81 +1,80 @@
 ---
 name: deliverable-pack
-description: "把一次性工作沉淀成可复核的交付物包：面向人的通俗总览 + 结构化主报告 + 边做边写的执行日志 + 问题与修复记录 + 原始快照。做复现、迁移、审计、调研等需要交接的任务时使用。"
+description: "Turn one-off work into a reviewable deliverable pack: a human-facing overview, a structured main report, an append-as-you-go execution log, a problem-and-fix ledger, and raw snapshots. Use for reproduction, migration, audit, and research work that must be handed over."
 version: 0.1.0
 author: "kane.ji, Hermes Agent"
 license: MIT
 platforms: [windows, linux, macos]
 metadata:
   hermes:
-    tags: [deliverable, report, 交付物, 报告, 留痕, handover]
+    tags: [deliverable, report, handover, audit-trail, documentation]
 ---
 
-# 交付物包规范（Deliverable Pack）
+# Deliverable Pack
 
-同一件事，**三类读者**要看不同的东西：决策者只看结论，执行者照报告复做，复核者查日志与快照。
-把这三种需求落成固定的五个文件，交付才算完整。
+The same piece of work has **three readers**: a decision-maker who wants only the conclusion, an operator who re-runs your report, and an auditor who checks the log and snapshots. Satisfy all three with a fixed five-file pack.
 
-## 何时使用（When to Use）
+## When to Use
 
-- 复现 / 迁移 / 部署 / 审计 / 调研 / 排障这类「做完要给别人的」任务
-- 需要别人能**照你的产出再做一遍**，或需要事后追溯「当时到底做了什么」
-- 不适用：只在聊天里回答一个问题、一次性脚本
+- Reproduction / migration / deployment / audit / research / troubleshooting work that someone else must receive
+- When a third party must be able to **repeat your work**, or when "what exactly was done?" must be answerable later
+- Not for: answering a question in chat, one-off scripts
 
-## 五件套（The Pack）
+## The Pack
 
 ```text
-<产物类型>_<对象>_<YYYYMMDD_HHMM>/
-├─ 先读我_通俗总结.md      # 必出：1-2 屏，面向人，大白话（决策者先看这个）
-├─ 00_主报告.md            # 结构化结论 + 证据（执行者照它复做）
-├─ 01_执行日志.md          # 边做边写，禁止事后补（复核者看过程）
-├─ 02_问题与修复记录.md    # 每个问题一条完整记录
-├─ 03_产物/                # 最终可用文件，保留原相对路径
-└─ 04_原始快照/            # 改动前的原文 / git commit，供 diff
+<artifact-type>_<subject>_<YYYYMMDD_HHMM>/
+├─ README-FIRST-overview.md   # required: 1-2 screens, plain language (decision-maker starts here)
+├─ 00_main-report.md          # structured conclusion + evidence (operator follows this)
+├─ 01_execution-log.md        # appended as you go; never written up afterwards
+├─ 02_problems-and-fixes.md   # one complete record per problem
+├─ 03_artifacts/              # final usable files, original relative paths kept
+└─ 04_baseline-snapshot/      # pre-change files / git commit, so the diff has a base
 ```
 
-## 各文件要点
+## What Each File Must Contain
 
-**① `先读我_通俗总结.md`（最重要，别省）**
-- 一句话结论（通过 / 通过但需注意 / 未成功，含原因）
-- 做了什么、你现在怎么用（可直接照做的命令）
-- **文件地图**：标出「重要（看这个就行）」/「成果」/「过程记录（一般不用翻）」
-- 遗留事项与风险
-- 要求：无行话、不贴日志、不超过 2 屏
+**① `README-FIRST-overview.md` (most important — never skip)**
+- One-sentence conclusion (passed / passed with caveats / failed, and why)
+- What was done, and how to use it now (copy-pasteable commands)
+- **File map**: label "important (read this)", "results", "process record (usually skip)"
+- Open items and risks
+- Rules: no jargon, no log dumps, at most 2 screens
 
-**② `00_主报告.md`**
-固定小节：任务信息 → 环境 → 验收标准 → 步骤与结果 → 结论 → 复做指引。
-每条结论都要**带证据**（命令 + 实际输出片段 + 位置），能被第三方直接验证。
+**② `00_main-report.md`**
+Fixed sections: task info → environment → acceptance criteria → steps and results → conclusion → how to repeat.
+Every conclusion carries **evidence**: command + actual output excerpt + location, so a third party can verify it directly.
 
-**③ `01_执行日志.md`**
-每步一条：原句 → 实际命令 → 输出与退出码 → 判定（通过/失败/偏差）。
-**边做边追加**，不要事后凭记忆补写（补写会丢真相）。
+**③ `01_execution-log.md`**
+One entry per step: source sentence → actual command → output and exit code → verdict (pass / fail / deviation).
+Append **while you work**; never reconstruct from memory afterwards (memory flatters the process and erases real deviations).
 
-**④ `02_问题与修复记录.md`**
-每个问题：报错原文（不要翻译摘要）→ 归因 → 修复动作与**固化位置** → 验证方式与结果。
+**④ `02_problems-and-fixes.md`**
+Per problem: raw error text (not a translated summary) → root cause → fix action and **where it was made permanent** → verification method and result.
 
-**⑤ `03_产物/` 与 `04_原始快照/`**
-产物保留原相对路径，便于直接覆盖使用；快照留住改动前的原文或 commit hash，让 diff 有基准。
+**⑤ `03_artifacts/` and `04_baseline-snapshot/`**
+Artifacts keep their original relative paths so they can be dropped in directly. The snapshot preserves pre-change files or a commit hash so the diff has a baseline.
 
-## 纪律（Discipline）
+## Discipline
 
-- **结论先行**：报告开头就给结论，过程放后面。
-- **日志与总结分开**：过程记录不等于交付物；不要把流水账塞进「先读我」。
-- **每条结论可复核**：给命令、给路径、给输出片段，不给「已验证」这类空话。
-- **路径用相对或占位**：产物包内互相引用用相对路径，别把本机绝对路径写死进文档。
-- **时间戳进目录名**：同一天多次交付不会互相覆盖。
+- **Conclusions first**: the report opens with the conclusion; process comes after.
+- **Log and overview stay separate**: a process record is not a deliverable; never stuff a running commentary into "read me first".
+- **Every conclusion is verifiable**: give the command, the path, the output excerpt — never "verified".
+- **Relative or placeholder paths**: references inside the pack are relative; never bake machine-specific absolute paths into documents.
+- **Timestamp the directory**: multiple deliveries per day must not overwrite each other.
 
-## 坑（Pitfalls）
+## Pitfalls
 
-- **只有报告没有总览**：接收者要自己从几十页里找结论 → 等于没交付。
-- **日志事后补写**：记忆会美化过程，问题与真实偏差被抹掉。
-- **报错只留摘要**：归因阶段看不出真正的错，复做时重现不了。
-- **文件地图缺失**：产物目录里十个文件，接收者不知道先看哪个。
-- **把过程当结论**：长篇过程记录塞满报告，结论淹没。
+- **Report without an overview**: the recipient has to dig through dozens of pages for the conclusion — effectively nothing was delivered.
+- **Writing the log afterwards**: memory rewrites the process and erases deviations.
+- **Keeping only a summary of errors**: root-causing and re-running become impossible.
+- **Missing file map**: ten files in a directory and the recipient doesn't know where to start.
+- **Process treated as conclusion**: long running commentary fills the report and drowns the conclusion.
 
-## 验收（Verification）
+## Verification
 
-- [ ] 五件套齐全，`先读我_通俗总结.md` 有明确的一句话结论与文件地图
-- [ ] 主报告每条结论都有命令 + 输出/位置
-- [ ] 执行日志是逐步追加的（时间顺序、含退出码），不是概括
-- [ ] 每个问题都能从「原文 → 归因 → 修复位置 → 验证」串起来
-- [ ] 产物与快照都在，第三方按报告能再跑一遍
+- [ ] All five parts present; the overview states a one-sentence conclusion and a file map
+- [ ] Every main-report conclusion has a command + output/location
+- [ ] The execution log is chronologically appended (with exit codes), not summarized
+- [ ] Every problem reads as raw error → root cause → fix location → verification
+- [ ] Artifacts and snapshot exist; a third party can re-run from the report alone

@@ -1,99 +1,99 @@
 ---
 name: code-authoring
-description: "写新功能代码或改他人代码前加载：英文注释规范 + 最小充分改动。"
+description: "Load before writing new code or editing code you did not just create: comment hygiene (write why, follow the file's conventions) and minimal-sufficient-diff discipline. Keeps diffs reviewable and prevents scope creep."
 version: 0.1.0
 author: "kane.ji, Hermes Agent"
 license: MIT
+platforms: [windows, linux, macos]
 metadata:
   hermes:
-    tags: [编码规范, 注释, 最小改动, 代码质量, authoring]
+    tags: [coding-standards, comments, minimal-diff, code-quality, authoring]
 ---
 
-# 编写代码规范（Code Authoring: Minimal Sufficient Diff & Comment Hygiene）
+# Code Authoring: Minimal Sufficient Diff & Comment Hygiene
 
-## When to Use（适用场景）
+## When to Use
 
-- 编写新功能代码时
-- 修改**非本次会话新建**的代码之前（含修 bug、重构、补测试、改配置类源码）
-- 需要控制 diff 规模、避免"顺手改动"淹没真实变更时
+- Writing new feature code.
+- Before modifying code **not created in this session** (bug fixes, refactoring, tests, config-as-code).
+- Whenever the diff must stay small so "while I was in there" edits don't bury the real change.
 
-> **不要用于**：纯提交前审查（用 `requesting-code-review`）；测试先行流程本身（用 `test-driven-development`）；已提交后的批量简化清理（用 `simplify-code`）；一次性验证思路（用 `spike`）。
+> **Not for**: pre-commit review alone (`requesting-code-review`); the TDD loop itself (`test-driven-development`); post-commit bulk cleanup (`simplify-code`); throwaway spikes (`spike`).
 
-> **冲突优先级**：项目既有风格 > 本技能默认值；根因修复 > 最小 diff（两者冲突时先说明再动手）；正确性/安全性 > 简洁。
+> **Conflict priority**: existing project style > this skill's defaults; root-cause fix > minimal diff (if they conflict, explain first, then act); correctness/safety > brevity.
 
-## 六条规则（Rules）
+## Six Rules
 
-1. 本技能独立成篇，只管「产码阶段」：写新代码、改他人代码。
-2. 触发面覆盖任何生产代码的写或改，不限于"新功能"。
-3. 注释：语言跟随文件既有风格（新文件默认英文）；只写 why；禁止把提示词、需求原文、对话内容写进注释。
-4. 改动遵循**最小充分改动**：改到需求/缺陷被完整解决为止，不多不少。
-5. 改他人代码前先建「现状快照」：读既有约定 + 跑基线。
-6. 交付前自检：范围、注释、是否真跑过。
+1. This skill is self-contained and covers only the *authoring* phase: new code, and edits to existing code.
+2. Its trigger surface covers any production-code write or edit — not just "new features".
+3. Comments: follow the file's existing language (English by default for new files); write **why** only; never paste prompts, requirement text, or conversation content into comments.
+4. Changes follow the **minimal sufficient diff**: change exactly enough to fully resolve the requirement or defect — no more, no less.
+5. Before touching existing code, build a **current-state snapshot**: read existing conventions, run the baseline.
+6. Before delivering: self-check scope, comments, and whether you actually ran it.
 
-## 执行流程（Procedure）
+## Procedure
 
-**步骤1 建现状快照（改他人代码前必做）**
+**Step 1 — Current-state snapshot (mandatory before editing existing code)**
 
-① 读该文件/模块的既有约定：命名风格、注释语言、错误处理方式、日志方式、依赖与目录布局。
-② 找出并运行基线：构建 / 测试 / lint，或最小可复现命令；把当前行为与输出记下来。
-③ 若目标是全新文件（无既有约定）：注释默认英文，其余沿用同目录邻近文件风格。
+① Read the file/module conventions: naming, comment language, error handling, logging, dependencies, layout.
+② Find and run the baseline: build / tests / lint, or the smallest reproducible command. Record current behavior and output.
+③ New file with no siblings: English comments; otherwise follow the neighbor files.
 
-判据：能回答"改动前它是什么行为"，并给出基线命令与实际输出。
+Pass criterion: you can state "what it did before my change" and show the baseline command plus its actual output.
 
-**步骤2 界定改动范围（最小充分改动）**
+**Step 2 — Bound the change (minimal sufficient diff)**
 
-① 先用一句话写清：需求或缺陷是什么 + 验收判据是什么。
-② 列出"必须改"的最小集合：目标函数/文件 + 其调用点 + 必要测试。
-③ 黑名单（禁止顺手做）：重新格式化或调换行、重命名、调整 import 顺序、添加未被要求的日志/参数/开关/兜底/抽象层、引入新依赖、修改公共接口签名、跨文件大范围重排。
-④ 白名单（必须允许，否则交出半成品）：输入校验、错误与异常处理、资源释放、被改函数的调用点同步更新、必要测试、格式化工具（black/ruff/prettier 等）强制的改动。
-⑤ 禁止为了让测试通过而加特判、hardcode、注释掉断言或绕过校验 —— 要修根因；根因在本次范围之外时，先说明并征得同意再动。
+① Write one sentence: what the requirement/defect is, and what the acceptance criterion is.
+② List the minimum "must change" set: target function/file + its call sites + necessary tests.
+③ Blacklist (never do "while you're there"): reformatting or reordering lines, renaming, reordering imports, adding unrequested logging/params/flags/fallbacks/abstractions, introducing new dependencies, changing public signatures, broad cross-file reshuffles.
+④ Whitelist (required — otherwise you ship half a fix): input validation, error/exception handling, resource release, updating call sites of changed functions, required tests, changes forced by formatters (black/ruff/prettier).
+⑤ Never add special cases, hardcode values, comment out assertions, or bypass validation to make tests pass — fix the root cause. If the root cause is out of scope, explain and get agreement first.
 
-**步骤3 写代码**
+**Step 3 — Write the code**
 
-① 沿用既有风格与结构；只有新文件才启用默认约定。
-② 不做"顺便优化"；发现的无关问题写入清单，不在本次修改（除用户明确同意）。
+① Follow existing style and structure; only new files use the defaults.
+② No opportunistic optimization. Record unrelated problems in a list instead of fixing them here (unless explicitly agreed).
 
-**步骤4 注释规范（Comment Hygiene）**
+**Step 4 — Comment hygiene**
 
-① 语言：跟随文件既有风格；新文件默认英文。
-② 内容：只解释 **why**（为什么这么做）、边界条件、单位、副作用、来源依据；**what**（参数/返回/异常）只在函数级 API 文档中写。
-③ 篇幅：能用命名表达的不写注释；单行注释不超过 1 行，块注释不超过 3 行。
-④ 禁止清单（可用 grep 自检）：提示词 / 需求原文 / 对话内容、"由 AI 生成"或"按用户要求"类署名、日期式变更日志（如 `2026-10-02 修改`）、emoji、装饰性分隔线、注释掉的死代码、空泛 TODO、`@author` 占位。
+① Language follows the file; new files default to English.
+② Content: explain **why** (rationale), boundary conditions, units, side effects, provenance. **What** (params/returns/exceptions) belongs only in function-level API docs.
+③ Length: if naming already expresses it, skip the comment; single-line comments ≤ 1 line, block comments ≤ 3 lines.
+④ Banned (greppable): prompts / requirement text / conversation snippets, "AI-generated" or "as requested" attributions, date-stamped change logs (`2026-10-02 fix`), emoji, decorative separators, commented-out dead code, vague TODOs, `@author` placeholders.
 
 ```bash
-# 注释违规自检(按语言调整 --type / 扩展名)
-rg -n "由 ?AI|AI[- ]?generated|as requested|按用户要求|\d{4}-\d{2}-\d{2}|TODO|FIXME" \
-   -g '!*test*' -g '!*.md' .
+# Comment hygiene self-check (adjust extensions per language)
+rg -n "AI[- ]?generated|as requested|\d{4}-\d{2}-\d{2}|TODO|FIXME" -g '!*test*' -g '!*.md' .
 ```
 
-**步骤5 自检与验证**
+**Step 5 — Self-check and verify**
 
-① 跑基线命令与新增测试；无法运行时说明原因并给出替代证据（静态检查、手工复现步骤）。
-② diff 复核：是否触碰与任务无关的文件/函数；每处改动能否用一句话说出"为什么必需"。
-③ 注释按步骤4的禁止清单过一遍。
-④ 交付内容：改动清单（文件:行 + 必然性说明）+ 验证命令与结果。
+① Run the baseline plus the new tests; if you cannot run them, say why and give substitute evidence (static checks, manual repro steps).
+② Review the diff: does it touch anything unrelated? Is every hunk justifiable in one sentence?
+③ Re-check comments against the Step 4 banned list.
+④ Deliverable: change list (`file:line` + why it is necessary) + verification commands and results.
 
-**步骤6 汇报**
+**Step 6 — Report**
 
-① 只给结论与证据：改了什么、为什么必需、怎么验证的。
-② 无关问题、后续建议单列，不混进本次改动。
+① Conclusions and evidence only: what changed, why it was necessary, how it was verified.
+② Unrelated issues and follow-ups go in a separate list, never mixed into this change.
 
-## 常见坑（Pitfalls）
+## Pitfalls
 
-- **触发面偏窄**：只把"写新功能"当触发点，会漏掉修 bug、重构、补测试 —— 这些同样在范围内。
-- **"他人代码"判定错**：标准是"本次会话未新建 / 你尚未读懂其上下文"，不是"仓库里所有文件"；读不懂先读懂再改。
-- **最小改动最常见的误用**：为了让测试变绿而打补丁（加特判、hardcode、注释断言）—— 这属于禁止项，不是"最小"。
-- **一致性优先**：中文注释的项目里插入英文注释并不叫"规范"，跟随既有风格优先于默认值。
-- **注释复述代码**：`@param x x 的值` 这类 what 注释是噪音；能用命名表达的就不要写注释。
-- **顺手格式化**：会把 diff 淹没，reviewer 无法判断真实改动，也让回滚变危险。
-- **发现即修改的冲动**：无关缺陷只记录不修，否则改动范围失控、责任无法界定。
-- **grep 只能筛形态**：禁止清单能抓字面违规，抓不住"表达了 what 而非 why"，需人工再过一遍。
+- **Trigger too narrow**: treating only "new features" as in scope misses bug fixes, refactors, and tests.
+- **Misjudging "someone else's code"**: the test is "not created in this session / you don't yet understand its context" — not "every file in the repo". If you don't understand it, understand it first.
+- **The classic misuse of "minimal"**: patching tests green (special cases, hardcoding, commenting assertions) is a banned item, not minimality.
+- **Defaults over consistency**: inserting English comments into a Chinese-commented project isn't "standard" — follow the existing style.
+- **Comments that restate code**: `@param x the value of x` is noise. If naming suffices, don't comment.
+- **Reformatting while you're there**: buries the real diff, blocks review, makes rollback risky.
+- **Fix-it-now urge**: unrelated defects get recorded, not fixed — otherwise scope and accountability dissolve.
+- **grep catches form only**: the banned list finds literal violations, not "explains what instead of why" — review by hand.
 
-## 完成度自检（Verification）
+## Verification
 
-- [ ] 改动前有基线记录（命令 + 实际输出）
-- [ ] diff 仅含"必须改"集合，黑名单零命中
-- [ ] 注释语言与文件既有风格一致；禁止清单零命中
-- [ ] 每处改动能用一句话说明必要性
-- [ ] 已实跑验证，或说明不能跑的原因并给出替代证据
-- [ ] 无关问题已记录但未在本次修改
+- [ ] Baseline recorded before the change (command + actual output)
+- [ ] Diff contains only the "must change" set; blacklist zero hits
+- [ ] Comment language matches the file; banned list zero hits
+- [ ] Every hunk justifiable in one sentence
+- [ ] Verification actually run, or the reason it couldn't be plus substitute evidence
+- [ ] Unrelated issues recorded but not modified

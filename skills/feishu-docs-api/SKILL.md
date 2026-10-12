@@ -1,94 +1,183 @@
 ---
 name: feishu-docs-api
-description: "用 REST API 直写、同步、归档飞书云文档（docx / wiki / bitable）：块读写、md 上云、wiki 节点与归档目录、权限链路、实测坑与写后核对。需要改飞书文档、把 md 同步上云、建知识库节点时使用。"
+description: "Drive Feishu/Lark cloud documents over REST (docx / wiki / bitable): read and edit blocks, publish or sync markdown, create and archive wiki nodes, manage permissions, plus verified formats, error codes, and post-write verification. Use when a task requires editing a Feishu doc, syncing markdown into one, or building knowledge-base nodes."
 version: 0.1.0
 author: "kane.ji, Hermes Agent"
 license: MIT
 platforms: [windows, linux, macos]
 metadata:
   hermes:
-    tags: [feishu, lark, docx, wiki, bitable, rest, api, 飞书]
+    tags: [feishu, lark, docx, wiki, bitable, rest, api]
 ---
 
-# 飞书云文档 REST 操作（Feishu Docs API）
+# Feishu Cloud Documents over REST (Feishu Docs API)
 
-把「改飞书文档 / 把 md 同步上云 / 建知识库节点归档 / 读写多维表格」从一次性手工调试变成可复现流程：
-**取 token → 解析目标 → 读现状 → 写 → 上云 → 归档 → 写后核对**。
-无 CLI 依赖，纯 REST + `tenant_access_token`。
+Turn "edit a Feishu doc / sync markdown up / create a knowledge-base node / write a bitable" into a repeatable pipeline:
+**get a token → resolve the target → read current state → write → publish markdown → archive → verify**.
+No CLI required — plain REST plus a `tenant_access_token`.
 
-## 何时使用（When to Use）
+## When to Use
 
-- 批量修改飞书云文档：标题、正文、列表项、表格、代码块、行内样式
-- 把本地 md 发布成飞书 docx，或原地同步进用户指定的既有文档
-- 知识库（wiki）节点：解析链接、建节点、移动、改名、按天归档目录
-- 读写多维表格（bitable）：字段改造、批量写记录、跨库搬迁
-- 不适用：文档内容质检规则（审查类技能）、只读浏览（用飞书客户端）
+- Bulk-editing Feishu documents: titles, body text, list items, tables, code blocks, inline styles
+- Publishing local markdown as a Feishu docx, or syncing it in place into an existing document
+- Wiki operations: resolving links, creating/moving/renaming nodes, per-day archive folders
+- Reading and writing bitables (multi-dimensional tables): field rework, batch record writes, cross-base migration
+- Not for: document content QA rules (use an audit skill); read-only browsing (use the Feishu client)
 
-## 前置（Prerequisites）
+## Prerequisites
 
-- 应用凭据 `FEISHU_APP_ID` / `FEISHU_APP_SECRET`（环境变量或 `~/.hermes/.env`）→ 换 `tenant_access_token`
-- 应用必须被加为目标文档 / 知识库空间的协作者，权限不够会返回 131006 / 1770032（见 §4）
-- **动手前先探活**：`GET /wiki/v2/spaces/get_node?token=<wiki_token>` 返回 `code=0` 再往下做
+- An app with `FEISHU_APP_ID` / `FEISHU_APP_SECRET` (environment or `~/.hermes/.env`) → exchange for `tenant_access_token`
+- The app must be a collaborator on the target document / wiki space; insufficient permission returns `131006` or `1770032`
+- **Probe before acting**: `GET /open-apis/wiki/v2/spaces/get_node?token=<wiki_token>` must return `code=0`
+- Never hardcode tokens in scripts, documents, or logs; test with a plain docx rather than a wiki node
 
-## 流程（Procedure）
+## Pipeline
 
-**1. 取 token**
-`POST /open-apis/auth/v3/tenant_access_token/internal`，body `{"app_id":..., "app_secret":...}`。
+**1. Get a token**
+`POST /open-apis/auth/v3/tenant_access_token/internal` with `{"app_id":…,"app_secret":…}`.
 
-**2. 解析目标容器**
-- wiki 链接 `.../wiki/<node_token>`：`GET /wiki/v2/spaces/get_node?token=<node_token>` → `data.node.obj_token` 才是 docx document_id
-- docx 链接 `.../docx/<doc_id>`：直接用
-- **wiki token ≠ doc id**，不解析直接写块必失败
+**2. Resolve the target container**
+- Wiki link `.../wiki/<node_token>`: `GET /wiki/v2/spaces/get_node?token=<node_token>` → `data.node.obj_token` **is** the docx document id
+- Docx link `.../docx/<doc_id>`: use it directly
+- **A wiki token is not a document id** — writing blocks without resolving first always fails
 
-**3. 读现状**
-`GET /docx/v1/documents/{doc}/blocks?page_size=500&document_revision_id=-1`，按 `has_more` 翻页。
-块级改动后旧 block id 可能失效 —— 再操作前重新 fetch。
+**3. Read current state**
+`GET /docx/v1/documents/{doc}/blocks?page_size=500&document_revision_id=-1`, following `has_more`.
+Block ids can become invalid after block-level edits — re-fetch before the next operation.
 
-**4. 写内容**
-- 改块文本（标题/正文/列表/代码块通用）：`PATCH /docx/v1/documents/{doc}/blocks/{block_id}`，body `{"update_text_elements": {"elements": [{"text_run": {"content": "..."}}]}}`
-- 富文本块（多 run、加粗/链接）：先 GET 拿完整 elements，deep-copy 后只改 `content`，整组写回 → 样式不被拍平
-- 插块 / 删块：走 `blocks/{parent}/children`（`index` 定位；删块区间必须放 JSON body）
-- 表格单元格：单元格内是独立文本块，改它要 PATCH 该单元格块
+**4. Write content**
 
-**5. md 上云**
-本地把 md 解析成块数组（`#`→heading、`> `→quote、`- [ ]`→todo、`- `→bullet、其余→text、表格→原生表格）→ `POST .../blocks/{doc}/children` 批量写入（每批 ≤40 块，`index:-1` 追加）→ 设链接共享 → 加用户为协作者（见 references）。
+```bash
+# Update a block's text (works for headings, text, bullets, quotes, todos, and code blocks)
+PATCH /open-apis/docx/v1/documents/{doc_id}/blocks/{block_id}
+body {"update_text_elements": {"elements": [{"text_run": {"content": "new full text"}}]}}
+# Insert blocks at a position (index is the position among the parent's children)
+POST /open-apis/docx/v1/documents/{doc_id}/blocks/{doc_id}/children
+body {"children": [<block>], "index": N}          # index:-1 appends
+# Delete: the range must live in the JSON body, not the query string
+DELETE /open-apis/docx/v1/documents/{doc}/blocks/{parent}/children/batch_delete
+body {"start_index": 0, "end_index": n}
+```
 
-**6. 归档与节点**
-归档目录按**天** `YYYY-MMDD`（由 `--date` 推导，不存在自动建）；建节点
-`POST /wiki/v2/spaces/{space_id}/nodes`，`obj_type` 必须是字符串（`"docx"`）。
+Invalid forms to stop trying: `{"replace_heading3": …}` → `1770001`; `PUT` on the same path → `404`.
 
-**7. 写后核对（必做，别信脚本自述）**
-分页回读云端块数，与本地解析结果比对：**表格块数（`block_type == 31`）必须相等**；顶层块末块不应停在表格上；顶层块数 = 解析块总数 + 表格数。
+**Style-preserving replacement (rich-text blocks)**
+Fetch the block, `deepcopy` its elements, change only `text_run.content`, then PATCH the whole element array back — existing runs keep their bold/italic/link styles instead of being flattened.
+Whitespace often straddles runs (run A ends with a space, run B starts with a letter): scan **adjacent run pairs** and trim at that boundary. Keep the space in cases like `5 V` / `12 TOPS` (`prev.isdigit() and nxt.isalpha()`).
+When italicising identifiers, always read back: naive regex matches words inside other words (`Enter` inside `Enterprise`), and whole-paragraph runs can go italic by accident.
 
-## 资产（Assets）
+**5. Publish markdown**
 
-| 文件 | 用法 |
-|---|---|
-| `references/direct-write-verified-formats.md` | 已验证的块 XML/格式（表格、Note、代码块、颜色、li 子块）与 9 个出过事故的坑 |
-| `references/docx-rest-verified.md` | docx / wiki REST 端点与 body 实测；权限错误码速查 |
-| `references/feishu-docx-blocks-wiki-api.md` | block_type 编号表、md 上云路线、wiki 节点创建、bitable 授权模型 |
-| `references/docx-block-edit-and-wiki-tree-ops.md` | 保留样式的 run 级替换、跨 run 边界、标识符斜体、节点树操作、bitable 迁移 |
-| `references/wiki-archive-and-node-ops.md` | 归档目录粒度、节点命名、move / update_title / 删除通道 |
-| `references/report-md-to-wiki.md` | md → 飞书块语法支持矩阵、单表 9 行上限、列宽计算、单元格改写 |
-| `references/feishu-md-writeback-pitfalls.md` | 围栏嵌套坑、推云前本地自检、写后核对口径修正 |
-| `references/sync-md-to-existing-doc.md` | 把 md 原地写进用户指定的既有文档（不建节点、不改标题、幂等） |
+1. Create an empty document: `POST /docx/v1/documents {"title": …}`
+2. Parse the markdown into blocks: `#/##/###` → heading 3/4/5, `> ` → quote, `- [ ]` / `- [x]` → todo (with `done`), `- ` → bullet, `1. ` → ordered, `---` → divider, tables → native tables, everything else → text
+3. Write in batches: `POST /docx/v1/documents/{doc}/blocks/{doc}/children`, ≤ 40 blocks per call, `index:-1`
+4. Set link sharing: `PATCH /drive/v1/permissions/{doc_id}/public?type=docx` → `tenant_readable`
+5. Add the human as a collaborator (below) so they can move it into their own space without copy-paste
 
-## 坑（Pitfalls）
+Do **not** use `upload_all` + `import_tasks` (repeated `1061002 params error`).
 
-- **wiki token ≠ document_id**：先 `get_node` 解析成 `obj_token` 再写块
-- **`obj_type` 必须传字符串枚举名**（`"docx"`），传数字报 field validation failed
-- **分享面板默认搜不到机器人**：搜应用要切「机器人 / 应用」tab
-- **权限分层**：文档级协作者 ≠ 空间成员；wiki 建节点需空间成员（可管理）；bitable 写需 Base 可管理
-- **单表上限 9 行（含表头）**，超出报 1770001；`column_width` 不传时飞书默认每列 100px，需按内容计算
-- **md 里不要嵌套代码围栏**：解析器按「首个行首围栏起、下一个行首围栏止」朴素匹配，会提前闭合
-- **git-bash / MSYS**：裸调 API URL 会被路径改写（404）→ `MSYS_NO_PATHCONV=1`
-- **Windows 控制台 GBK**：打印中文的脚本先 `sys.stdout.reconfigure(encoding='utf-8')`
-- **回读必须翻页**：别把单页 500 当总数；`page_size > 50` 的节点列表接口会被拒（131002）
-- **凭据不落盘**：token 从环境变量取，别写进脚本默认值、文档或日志
+**6. Wiki nodes and archiving**
 
-## 验收（Verification）
+```bash
+# Create (obj_type MUST be the string enum, e.g. "docx"; a number → 99992402 field validation failed)
+POST /wiki/v2/spaces/{space_id}/nodes
+body {"obj_type": "docx", "node_type": "origin", "parent_node_token": <parent>, "title": …}
+# Move within a space (node_token is unchanged → existing links keep working)
+POST /wiki/v2/spaces/{space_id}/nodes/{node_token}/move
+body {"target_parent_token": "<parent>", "target_space_id": "<space_id>"}
+# Rename / list children (page_size > 50 → 131002)
+POST /wiki/v2/spaces/{space_id}/nodes/{node_token}/update_title   body {"title": …}
+GET  /wiki/v2/spaces/{space_id}/nodes?parent_node_token=<pid>
+# Delete: node-level DELETE usually has no permission; delete the underlying docx instead
+DELETE /drive/v1/files/{obj_token}?type=docx        # async, returns task_id
+```
 
-- [ ] 写后回读：云端块数 / 表格数与本地解析结果一致，末块不在表格上
-- [ ] 幂等：对同一目标文档重复同步，URL 与节点名不变
-- [ ] 权限异常能区分：131006（无权限）/ 1770032（只读）/ 99991672（scope 未开通）
-- [ ] 文档里不出现内部标识与凭据；测试产物用后即删（测试用普通 docx，别用 wiki 节点当探针）
+Archive folders are **per day** (`YYYY-MMDD`, derived from a `--date` argument, created on demand). A wiki URL may point at the root of a whole tree (`has_child=true`, little content) — call `get_node`, list children, and decide whether you're looking at one page or a tree entry before acting.
+Deleting a folder docx makes its children bounce back to the parent directory root; they are not deleted with it.
+**Don't use wiki nodes as API probes** — create a plain docx for testing and delete it afterwards.
+
+**7. Permissions and sharing (after creating)**
+
+```bash
+PATCH /drive/v1/permissions/{token}/public?type=docx
+body {"link_share_entity":"tenant_readable","external_access_entity":"open","comment_entity":"anyone_can_view"}
+POST /drive/v1/permissions/{token}/members?type=docx
+body {"member_type":"openid","member_id":"ou_<open_id>","perm":"full_access"}
+```
+
+The user's `open_id` can be read from `metas/owner_id` of any document they own. Granting `full_access` lets them move or delete the report in the UI — no copy-paste needed.
+For bitables the same endpoint takes `?type=bitable`; the **share panel cannot find an app by default** — switch to the "Bots / Apps" tab. Writing a base requires full_access (read-only collaborators get `91403 Forbidden` on renames and `batch_create`).
+
+**8. Verify after writing (never trust a script's own narration)**
+Page through the blocks again (`has_more` loop — a single page of 500 is not the total) and compare with the local parse: **the number of table blocks (`block_type == 31`) must match**, the top-level last block should not be a table, and top-level blocks should equal parsed blocks + tables.
+
+## Block types (docx children, create and read use the same numbers)
+
+| type | block | notes |
+|---|---|---|
+| 1 | page (root; block_id == document_id) | — |
+| 2 | text | `{"block_type":2,"text":{"elements":[{"text_run":{"content":"…"}}]}}` |
+| 3–7 | heading 1–5 | same shape, key `heading1`…`heading5` |
+| 12 / 13 | bullet / ordered | keys `bullet` / `ordered` |
+| 14 | code | `style.language` |
+| 15 | quote | key `quote` |
+| 17 | todo | `"style":{"done":true|false}` |
+| 19 / 34 | callout / quote container | content lives in child blocks |
+| 27 | image | never rewrite or delete |
+| 30 | embedded sheet | convert to a native table where policy requires it |
+| 31 / 32 | native table / table cell | cells are block type 32 |
+
+Whether a "Note: …" line is already styled correctly depends on its **parent**: bt19/bt34 means it is already a callout/quote container; only bare text whose parent is the page root needs converting.
+
+## Markdown → Feishu rendering (what the parser accepts)
+
+| Markdown | Feishu block | Note |
+|---|---|---|
+| `#` … `####` | heading 1–4 | deeper levels fall back to text |
+| `> text` | quote | one block per line — good for date/scope/basis headers |
+| `- [ ]` / `- [x]` | todo | checkable in the UI; doubles as a work queue |
+| `- ` / `* ` / `1. ` | bullet / ordered | |
+| `---` | divider | |
+| fenced code block | code | multi-line content in a single `text_run` with `\n` works |
+| `\| a \| b \|` + separator | native table | **max 9 rows including the header**; longer tables are split with the header repeated |
+| `**bold**`, `` `code` ``, `[text](url)` | inline styles / link | URLs are percent-encoded automatically |
+
+- **Column widths must be computed**: omit `column_width` and every column defaults to 100px. Measure content (CJK = 2 units, Latin = 1, ≈ 7px per unit + 16px padding), give short columns a minimum, let wide columns share the remainder, and keep the total near the document body width.
+- Cell content lives in an auto-created empty text block inside the cell — edit that with `PATCH /blocks/{cell_inner_block_id}` + `update_text_elements`. Posting a new block into a cell adds a stray empty paragraph.
+- **Never nest code fences in markdown**: the parser treats the first fenced line as an opening fence and the next fenced line as its close, so an inner fence closes the outer block early and everything after degrades to plain text.
+- Pre-parse locally before publishing: count block types and flag any text block whose content holds a fence marker — that means a broken fence, so don't publish yet.
+
+## Error codes
+
+| Code | Meaning | Action |
+|---|---|---|
+| 131006 | node permission denied | add the app as a collaborator (share panel → "Bots" tab), or as a wiki space member for node creation |
+| 1770032 | forbidden on a docx write | collaborator permission is read-only → raise to edit/manage |
+| 99991672 | scope not granted (e.g. `wiki:wiki`, `wiki:node`) | the error message includes a one-click authorisation link for the app |
+| 99992402 | field validation failed | usually a wrong enum type (the error lists the accepted options) |
+| 131002 | page_size too large | node listing caps at 50 |
+| 1770001 | invalid param | e.g. a table exceeding 9 rows, or an unsupported JSON shape |
+| 1254061 | NumberFieldConvFail | bitable numbers read back as strings — cast with `int()` before `batch_create` |
+
+## Pitfalls
+
+- **A wiki token is not a document id** — resolve with `get_node` first.
+- **`obj_type` must be a string enum** (`"docx"`), not a number.
+- **App-created documents belong to the app**: grant the human `full_access` via `open_id`, then they can move them into their own knowledge base.
+- **Share panel hides bots**: switch tabs before searching for the app name.
+- **Permission layers differ**: document collaborator ≠ space member; wiki node creation needs space membership (manage), bitable writes need base manage.
+- **Table limits**: 9 rows including the header, width computed by hand, and `header_row: true` is valid inside `property`.
+- **Deleting blocks**: the index range belongs in the JSON body.
+- **Posting new blocks into a cell** creates an extra empty paragraph — patch the existing inner block instead.
+- **Don't use wiki nodes as test probes**; they are hard to delete.
+- **Checksum the round trip**: re-read the document and compare counts rather than trusting the publishing script.
+- **Windows/git-bash**: a bare API URL gets path-rewritten by MSYS (`404`) → prefix `MSYS_NO_PATHCONV=1`; scripts printing non-ASCII should set `PYTHONIOENCODING=utf-8` or `sys.stdout.reconfigure(encoding='utf-8')`.
+- **One call, one document** for long publishes; use a background handle with completion notification instead of blocking.
+
+## Verification
+
+- [ ] Block and table counts read back from the cloud match the local parse; the last top-level block is not a table
+- [ ] Re-publishing to the same target is idempotent (URL and node title unchanged)
+- [ ] Permission failures are distinguished correctly (131006 vs 1770032 vs 99991672)
+- [ ] No tokens, internal identifiers, or credentials appear in documents, scripts, or logs
+- [ ] Test artifacts deleted afterwards (plain docx, not wiki nodes)

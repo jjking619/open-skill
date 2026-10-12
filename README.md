@@ -2,9 +2,9 @@
 
 # open-skill
 
-**面向日常工作流的 Hermes Agent 技能集**
+**A skill pack for everyday engineering workflows — built for Hermes Agent**
 
-代码编写 · 代码审查 · 项目复现 · 云文档 API · Shell 工具链 · 脚本健壮化 · 设备联调 · 文档审计 · 交付物包 · 发布门禁
+Code authoring · repo review · project reproduction · publish gate · shell & script hardening · device debugging · cloud docs API · document audit · deliverable packs
 
 [![Skills](https://img.shields.io/badge/skills-10-2f81f7?style=flat-square)](#skills)
 [![Agent](https://img.shields.io/badge/Hermes%20Agent-skill%20package-8b5cf6?style=flat-square)](https://hermes-agent.nousresearch.com/docs)
@@ -13,344 +13,296 @@
 
 </div>
 
-> 把日常里**重复且有判断力**的活儿，沉淀成 AI Agent 可直接加载执行的技能包。
-> 每个技能 = 一个独立目录：`SKILL.md` 定义**触发条件 + 执行流程 + 实测坑**，`references/` 承载**清单与实测格式**，`templates/` 承载**产出物模板**。
-> 复制进 Hermes Agent 的技能目录即可使用，无外部依赖。
+> Repetitive work that still needs judgement, distilled into skills an AI agent can load and execute.
+> Every skill is **a single self-contained `SKILL.md`**: trigger conditions, an executable procedure, verified gotchas, and an acceptance checklist. No dependencies, no hidden assets — copy the folder into your agent's skill directory and it works.
 
 ---
 
 <a id="toc"></a>
 
-## 目录（Table of Contents）
+## Table of Contents
 
-| | 章节 |
+| | Section |
 |---|---|
-| 📦 | [技能一览（Skills Overview）](#skills) |
-| 💻 | [研发主链（Build Chain）](#build-chain) |
-| ✍️ | [代码编写 · code-authoring](#authoring) |
-| 🔍 | [代码审查 · github-repo-review-and-design](#code-review) |
-| 🧪 | [项目复现 · project-reproduction](#reproduction) |
-| 🚀 | [发布前审计 · prepublish-repo-audit](#prepublish) |
-| 🧰 | [环境与脚本（Environment & Scripts）](#environment) |
-| 🪟 | [Windows Shell 工具链 · windows-shell-tooling](#win-shell) |
-| 🔒 | [脚本健壮化 · shell-script-hardening](#script-hardening) |
-| 📱 | [设备联调 · adb-device-toolkit](#adb) |
-| 📋 | [交付与文档（Delivery & Docs）](#delivery-docs) |
-| 📄 | [云文档 API · feishu-docs-api](#feishu-api) |
-| 📐 | [文档一致性审计 · doc-consistency-audit](#doc-audit) |
-| 🗃️ | [交付物包 · deliverable-pack](#deliverable) |
-| 🚀 | [快速开始（Quick Start）](#quickstart) |
-| 🗂️ | [仓库结构（Repository Layout）](#layout) |
-| 📜 | [设计约定（Conventions）](#conventions) |
-| 📄 | [许可（License）](#license) |
+| 📦 | [Skills Overview](#skills) |
+| 🔗 | [The Build Chain](#build-chain) |
+| ✍️ | [code-authoring](#authoring) |
+| 🔍 | [github-repo-review-and-design](#code-review) |
+| 🧪 | [project-reproduction](#reproduction) |
+| 🚀 | [prepublish-repo-audit](#prepublish) |
+| 🪟 | [windows-shell-tooling](#win-shell) |
+| 🔒 | [shell-script-hardening](#script-hardening) |
+| 📱 | [adb-device-toolkit](#adb) |
+| 📄 | [feishu-docs-api](#feishu-api) |
+| 📐 | [doc-consistency-audit](#doc-audit) |
+| 🗃️ | [deliverable-pack](#deliverable) |
+| ⚡ | [Quick Start](#quickstart) |
+| 🗂️ | [Repository Layout](#layout) |
+| 📐 | [Conventions](#conventions) |
+| 📜 | [License](#license) |
 
 ---
 
 <a id="skills"></a>
 
-## 技能一览（Skills Overview）
+## Skills Overview
 
-| 技能 | 包名 / 版本 | 解决什么问题 | 典型触发语 |
+| Skill | Package / version | What it solves | Typical trigger |
 |:--|:--|:--|:--|
-| ✍️ **代码编写** | `code-authoring`<br>`v0.2.0` | 写新代码 / 改他人代码的**注释规范 + 最小充分改动**纪律 | 写新功能、改他人代码之前 |
-| 🔍 **代码审查** | `github-repo-review-and-design`<br>`v1.1.2` | 整仓**分级审查**；为新项目**设计仓库文件结构** | 「看下这个仓库值不值得用」 |
-| 🧪 **项目复现** | `project-reproduction`<br>`v0.1.1` | 按 README / 教程 / `install.sh` **逐步复现跑通**并把修复固化 | 「按这份教程复现、部署、跑通」 |
-| 🚀 **发布前审计** | `prepublish-repo-audit`<br>`v0.1.0` | 开源/交付前的**门禁**：可见性、密钥、内部标识、仓库卫生 | 「这个仓能公开吗」「开源前查一遍」 |
-| 🪟 **Windows Shell** | `windows-shell-tooling`<br>`v0.1.0` | Windows + git-bash 的**路径 / 换行 / 编码 / 落盘**坑 | 命令在 git-bash 里行为不对 |
-| 🔒 **脚本健壮化** | `shell-script-hardening`<br>`v0.1.0` | `install.sh` / 部署脚本**幂等、可诊断、不假成功** | 写或改一键安装脚本 |
-| 📱 **设备联调** | `adb-device-toolkit`<br>`v0.1.0` | **adb** 认设备、执行身份、传文件校验、长任务脱离会话 | 连板子 / Android 设备调试 |
-| 📄 **云文档 API** | `feishu-docs-api`<br>`v0.1.0` | REST 直写/同步/归档飞书云文档（docx / wiki / bitable） | 「改这篇飞书文档」「把 md 同步上云」 |
-| 📐 **文档一致性审计** | `doc-consistency-audit`<br>`v0.1.0` | 一批文档 / 多语言镜像的**一致性检查 + 分级报告** | 「这批文档审一遍」 |
-| 🗃️ **交付物包** | `deliverable-pack`<br>`v0.1.0` | 把一次性工作沉淀成**可复核的交付物包**（五件套） | 复现/迁移/调研做完要交接 |
+| ✍️ **Code authoring** | `code-authoring`<br>`v0.1.0` | Comment hygiene (write *why*) plus **minimal sufficient diff** discipline, so a small change stays small | before writing new code or editing code you didn't just create |
+| 🔍 **Repo review & design** | `github-repo-review-and-design`<br>`v1.1.2` | **Whole-repo graded review** (assessment / release modes) and **file-structure design** for new projects | "is this repo worth using?", "design the layout for this demo" |
+| 🧪 **Project reproduction** | `project-reproduction`<br>`v0.1.0` | Follow the README / tutorial / `install.sh` step by step, fix errors cheapest-path-first, make fixes permanent, deliver a report | "reproduce / deploy / get this project running" |
+| 🚀 **Pre-publish audit** | `prepublish-repo-audit`<br>`v0.1.0` | The **gate** before open-sourcing: visibility, secrets, internal identifiers, hygiene, history residue | "can this repo go public?", "audit before publishing" |
+| 🪟 **Windows shell** | `windows-shell-tooling`<br>`v0.1.0` | Windows + git-bash traps: path conversion, CRLF/LF, escaping, GBK console, pty line endings | a command misbehaves under git-bash |
+| 🔒 **Script hardening** | `shell-script-hardening`<br>`v0.1.0` | `install.sh` / deploy scripts that are **idempotent, diagnosable, and never falsely succeed** | writing or reviewing a one-click installer |
+| 📱 **Device debugging** | `adb-device-toolkit`<br>`v0.1.0` | **adb** workflows: identify devices, execution identity, transfer with checksums, detached long tasks | debugging a board or Android device |
+| 📄 **Cloud docs API** | `feishu-docs-api`<br>`v0.1.0` | Drive Feishu/Lark docs over REST: block editing, markdown publishing, wiki archiving, permissions | "edit this Feishu doc", "sync this markdown up" |
+| 📐 **Document audit** | `doc-consistency-audit`<br>`v0.1.0` | Consistency audit for a doc set or multilingual tree, with a severity-graded report | "audit this batch of documents" |
+| 🗃️ **Deliverable pack** | `deliverable-pack`<br>`v0.1.0` | Turn one-off work into a five-part reviewable pack | any work that must be handed over |
 
 ---
 
 <a id="build-chain"></a>
 
-## 研发主链（Build Chain）
+## The Build Chain
 
 ```text
-写代码 ─► 审整仓 ─► 复现验收 ─► 发布门禁 ─► 交付留痕
+write → review → reproduce → publish → hand over
 code-authoring → github-repo-review-and-design → project-reproduction → prepublish-repo-audit → deliverable-pack
 ```
+
+Peripheral but load-bearing: `windows-shell-tooling` and `shell-script-hardening` (environment and scripts), `adb-device-toolkit` (devices), `feishu-docs-api` and `doc-consistency-audit` (documents).
 
 ---
 
 <a id="details"></a>
 
-## 技能详解（Skill Details）
+## Skill Details
 
 <a id="authoring"></a>
 
-### ✍️ 1. 代码编写 —— `code-authoring`
+### ✍️ 1. code-authoring
 
-**定位**：只管「产码阶段」的两件事 —— **注释该写什么**、**改动该有多大**。
+**Focus**: two things only, at the moment code is produced — **what comments say** and **how big the change is**.
 
-**六条规则**：独立成篇；触发面覆盖任何生产代码的写或改；注释跟随文件既有语言（新文件默认英文）、只写 **why**；最小充分改动；改他人代码前先建**现状快照**；交付前自检范围、注释、是否真跑过。
+**Six rules**: self-contained and scoped to the authoring phase; trigger surface covers any production-code write or edit; comments follow the file's language (English for new files) and explain **why**; minimal sufficient diff; build a current-state snapshot before editing existing code; self-check scope, comments, and whether you actually ran it before delivering.
 
-**最小充分改动**：
-
-| | 内容 |
+| | Content |
 |:--|:--|
-| ✅ 白名单（必须做） | 输入校验、错误与异常处理、资源释放、被改函数的调用点同步更新、必要测试、格式化工具强制的改动 |
-| ⛔ 黑名单（禁止顺手做） | 重新格式化 / 调换行、重命名、调整 import 顺序、加未被要求的日志与开关与抽象层、引入新依赖、改公共接口签名、跨文件大范围重排 |
-| 🚫 底线 | 禁止为让测试通过而加特判 / hardcode / 注释掉断言 / 绕过校验 —— 要修根因，根因超范围先说明再动 |
+| ✅ Whitelist (required) | input validation, error handling, resource release, updating call sites, required tests, formatter-forced changes |
+| ⛔ Blacklist (no "while you're there") | reformatting, renaming, import reordering, unrequested logging/flags/abstractions, new dependencies, public-signature changes, broad reshuffles |
+| 🚫 Bottom line | never special-case, hardcode, comment out assertions, or bypass validation to make tests pass — fix the root cause; if it's out of scope, say so first |
 
-**流程**：建现状快照 → 界定范围（一句话需求 + 验收判据）→ 写代码 → 注释规范 → 自检验证 → 汇报（只给结论与证据）。
-
-**资产**：`SKILL.md`（含注释违规自检命令与完成度自查清单）。
+**Procedure**: current-state snapshot → bound the change (one-sentence requirement + acceptance criterion) → write code → comment hygiene → verify (baseline + diff review) → report conclusions and evidence only.
 
 ---
 
 <a id="code-review"></a>
 
-### 🔍 2. 代码审查 —— `github-repo-review-and-design`
+### 🔍 2. github-repo-review-and-design
 
-**定位**：**一个技能、两条工作流**，共享「定位仓库 + 模式判定」前置。
+**Focus**: one skill, two workflows sharing the same "locate the repo + decide the mode" preamble.
 
-| 工作流 | 做什么 | 模式 |
+| Workflow | What it does | Modes |
 |:--|:--|:--|
-| **A 整仓代码审查** | 克隆全量分析，输出分级报告（🔴 阻断 / 🟡 警告 / 💡 建议 / ✅ 亮点，条目带 `文件:行`） | **评估档**（第三方仓库，只读给建议）／ **发布档**（自家仓库，整改到可发布） |
-| **B 仓库文件设计** | 为新项目设计目录树 + 文件职责 + 标准文件要点；杂乱旧仓库给重组方案 | 四类基座：开源 demo / 应用服务 / 库 SDK / 内部工具 |
+| **A Whole-repo review** | clone, analyse in full, emit a graded report (🔴 blocking / 🟡 warning / 💡 suggestion / ✅ highlights, each with `file:line`) | **assessment** (third-party, read-only advice) · **release** (your repo, fix to publishable) |
+| **B File design** | directory tree + file responsibilities + standard-file contents for a new project; reorganisation plan for a legacy repo; optional scaffolding | four bases: open-source demo / application / library / internal tool |
 
-```text
-owner/repo | URL | 本地路径 | 一句话任务
-   │
-   ▼  Step 0  定位仓库 + 模式判定 ← 决定一切行为的岔路口
-   ├── Workflow A  整仓审查 ─► 分级报告（评估档结论卡 / 发布档就绪检查表）
-   └── Workflow B  文件设计 ─► 设计文档（目录树 + 职责表 + 标准文件要点）
-```
-
-**A 线扫描内容**：元数据与活跃度 → 结构与架构（宣称 vs 实际核对）→ 分层审查（L1 入口 / L2 核心逻辑 / L3 配置接口 / L4 工具脚本 / L5 测试 CI，六维清单）→ 自动化扫描（敏感信息、密钥、个人路径痕迹、残留标记、大文件误入库、依赖漏洞、死代码）→ 报告与整改闭环。
-
-**资产**：`SKILL.md` + `references/`（`review-checklist.md`、`report-template.md`、`layout-templates.md`、`design-output-template.md`）。
+**Layered scan**: L1 entry & startup → L2 core logic → L3 config/interfaces/device access → L4 tooling scripts → L5 tests & CI, each run through six dimensions (correctness · security · code quality · tests · performance · docs & engineering), followed by automated scans (secrets, private IPs, personal path traces, leftover markers, oversized files, dependency audits) and — in release mode — a history scan.
+**Read-only discipline**: assessment mode never edits third-party code.
 
 ---
 
 <a id="reproduction"></a>
 
-### 🧪 3. 项目复现 —— `project-reproduction`
+### 🧪 3. project-reproduction
 
-**定位**：把「按教程装一遍」做成**过程可预测、结果可复用**的交付 —— 下一次照着「报告 + 修改后文件」能一次通过。
+**Focus**: turn "install it by the tutorial" into a predictable process with a reusable result — the next person succeeds in one pass from "report + modified files".
 
 ```text
-P0 准备 ─► P1 按原文逐步执行（忠实原文，偏差记「文档偏差」）
-        ─► P2 报错 → 最优路径（环境差异 → 配置 → 代码/文档不符 → 平台特有坑）
-        ─► P3 收尾（全量重跑 + diff + 报告 + 归档）
+P0 prepare ─► P1 execute the documented steps faithfully (deviations logged, not silently fixed)
+         ─► P2 errors → cheapest path (environment → configuration → code/docs mismatch → platform traps)
+         ─► P3 wrap up (full re-run + diff + report + archive)
 ```
 
-**核心纪律**：忠实原文；归因按成本从低到高、一次只试一个分支（同分支重试 ≤ 2 次无进展必须换或上报）；修复必须固化进文件；验收在目标身份下完成。
+**Core discipline**: stay faithful to the document first; root-cause order from cheapest to most expensive, one branch at a time (≤ 2 attempts before switching); every fix must be made **permanent in a file**; accept the result as the target user identity, not as an elevated shell.
 
-**产出目录**：`先读我_通俗总结.md` / `00_复现报告.md` / `01_执行日志.md` / `02_问题与修复记录.md` / `03_修改后文件/` / `04_原始快照/`（结构详见 `deliverable-pack`）。
+**Output**: `README-FIRST-overview.md` (one-sentence conclusion + file map), `00_reproduction-report.md`, `01_execution-log.md` (appended live), `02_problems-and-fixes.md`, `03_fixed-files/`, `04_baseline-snapshot/`.
 
-**精选坑**：脚本打印「All done」不等于成功（子进程可能根本没启动，要验证副作用）；非交互 shell 里用户 `PATH` 常不生效，会把环境问题误判成项目问题；`adb` 传二进制必须 `adb push` 并 md5 双边核对；目标设备根分区小，报错先 `df`。
-
-**资产**：`SKILL.md` + `templates/reproduction-report.md`。
+**Pitfalls worth remembering**: a script printing "All done" is not success (a child process may never have started — verify side effects); a non-interactive shell often skips the user's `PATH`, turning environment problems into apparent project bugs; transfer binaries with `adb push` and compare checksums; run `df` before declaring a dependency "missing" on a small root filesystem.
 
 ---
 
 <a id="prepublish"></a>
 
-### 🚀 4. 发布前审计 —— `prepublish-repo-audit`
+### 🚀 4. prepublish-repo-audit
 
-**定位**：**公开不可逆** —— 门禁必须排在 push 之前。
+**Focus**: **publishing is irreversible** — the gate runs before the push.
 
 ```text
-① 可见性判定（匿名 HTTP + cache-buster 复测）
-      ─► ② 内容扫描（密钥 / 内部标识 / 内部路径 / 内网 IP / 大文件 / 历史残留）
-            ─► ③ 处置（命中内部内容 → 停下问用户；脱敏另稿；改私有并复测）
+① visibility check (anonymous HTTP, re-tested with a cache-buster)
+     ─► ② content scan (secrets / internal identifiers / internal paths / private IPs / large files / history residue)
+           ─► ③ disposition (internal content found → stop and ask; sanitize a copy; make private and re-test)
 ```
 
-**要点**：仓库里只留环境变量名不留密钥值；已暴露的凭据必须**轮换**；「删文件再提交」不等于清除历史（要重写历史）；raw 走 CDN 缓存，判定私有必须加 cache-buster；脱敏稿在**副本**上做，改完**回读线上再扫一次**。
-
-**资产**：`SKILL.md`（含可直接复制的扫描命令、仓库卫生清单、验收清单）。
+**Key points**: the repo holds environment-variable *names*, never secret values; an already-exposed credential must be **rotated**; deleting a file in a new commit does not remove it from history; raw content is CDN-cached, so a cache-buster is required to confirm "now private"; sanitize on a copy and **re-scan the published content**.
 
 ---
 
-<a id="environment"></a>
-
-## 环境与脚本（Environment & Scripts）
-
 <a id="win-shell"></a>
 
-### 🪟 5. Windows Shell 工具链 —— `windows-shell-tooling`
+### 🪟 5. windows-shell-tooling
 
-**定位**：Windows 上用 git-bash（MSYS）跑命令、写脚本时的实测坑 —— 目标是**同一条命令换台机器也能跑**。
+**Focus**: git-bash (MSYS) on Windows, with the goal that the same command works on someone else's machine.
 
-**六条规则**：① 路径转换默认关闭（给原生程序传 `C:/...`，别传 `/c/...`；`cd` 是内建所以能进）；② 不用 PowerShell 语法；③ 含空格/中文路径整体加引号；④ 行尾统一 LF（`.gitattributes`）；⑤ 输出显式设 UTF-8（GBK 控制台会崩）；⑥ 交互输入按「回车」提交（只发 `\n` 不生效）。
+**Six rules**: ① path conversion is off by default (`C:/...` for native tools; `cd` is a builtin so `/c/...` works for it alone); ② no PowerShell syntax; ③ quote paths with spaces or non-ASCII; ④ LF everywhere (`.gitattributes`); ⑤ set UTF-8 explicitly (GBK consoles break non-ASCII output); ⑥ submit interactive input with a real Enter — a bare `\n` often does nothing.
 
-**落盘**：heredoc 用 `<<'EOF'`；反斜杠保真不可靠 → 用字节检查（`od -c`）；长文整文件写入；写完回读校验头字节。
-
-**资产**：`SKILL.md`（含排查顺序表）。
+**File writes**: quoted heredocs; backslash fidelity is not guaranteed, so test with byte checks (`od -c`); write long documents wholesale; read back the first bytes after writing.
 
 ---
 
 <a id="script-hardening"></a>
 
-### 🔒 脚本健壮化 —— `shell-script-hardening`
+### 🔒 6. shell-script-hardening
 
-**定位**：`install.sh` / 部署脚本的三条底线 —— **重复执行不坏、失败能说清、成功不自欺**。
+**Focus**: three bottom lines — **re-running never breaks anything, failures explain themselves, success never lies**.
 
-**六条纪律**：幂等（先探测再装，已满足打印 `[SKIP]`）；引号与数组；`mktemp` + `trap` 清理；每步打印且错误走 stderr 非零退出；不做危险默认（不 `curl|sh`、`rm -rf` 先判空）；结尾**验证副作用**而不是 echo "All done"。
+**Six disciplines**: idempotency (probe, then print `[SKIP]`); quoting and arrays; `mktemp` + `trap` cleanup; per-step logging with stderr and non-zero exits; no dangerous defaults (no `curl | sh`, guard `rm -rf`); verify **side effects** at the end instead of echoing success.
 
-**自检两条**：脚本自述不可信（重定向到不存在目录会让子进程根本不启动，却仍打印成功）；非交互 shell 的 `PATH` 陷阱（`~/.bashrc` early-return 导致解释器落到别的版本）。
-
-**资产**：`SKILL.md`（含骨架、`set -euo pipefail` 陷阱、验收清单）。
+**Two self-checks**: a script's own narration is not evidence (redirecting into a missing directory means the child never starts); non-interactive shells skip `~/.bashrc`, so interpreters resolve to the wrong version.
 
 ---
 
 <a id="adb"></a>
 
-### 📱 设备联调 —— `adb-device-toolkit`
+### 📱 7. adb-device-toolkit
 
-**定位**：把「连板子 / Android 设备干活」做成可复现流程。
+**Focus**: connect to a board or Android device and get work done repeatably.
 
 ```text
-认设备（devices -l，多设备固定 -s / -t）─► 认清执行身份（root vs 普通用户是两套环境）
-   ─► 传文件（push/pull + 双边 md5）─► 长任务脱离会话（setsid + 轮询日志）
-   ─► 端口方向（forward = PC→设备，reverse = 设备→PC，部分 adbd 不支持）
+identify (devices -l, pin -s / -t) ─► establish identity (root vs regular user are two environments)
+   ─► transfer (push/pull + md5 both sides) ─► long tasks (setsid + poll the log)
+   ─► port direction (forward = host→device, reverse = device→host, not supported by every adbd)
 ```
 
-**常见报错对照**：`unauthorized` / `offline` / `error: closed`（reverse、exec-out 不支持）/ 磁盘满（先 `df`）/ 外设枚举不到（adb 与 USB-host 互斥）。
-
-**资产**：`SKILL.md`。
+**Troubleshooting table**: `unauthorized` / `offline` / `error: closed` (reverse or exec-out unsupported) / disk full (run `df` first) / peripherals not enumerated (USB-host and adb can be mutually exclusive).
 
 ---
 
-<a id="delivery-docs"></a>
-
-## 交付与文档（Delivery & Docs）
-
 <a id="feishu-api"></a>
 
-### 📄 6. 云文档 API —— `feishu-docs-api`
+### 📄 8. feishu-docs-api
 
-**定位**：把「改飞书文档 / 把 md 同步上云 / 建知识库节点归档」从一次性手工调试变成可复现流程 —— 纯 REST + `tenant_access_token`，无 CLI 依赖。
+**Focus**: REST-only Feishu document operations, no CLI required.
 
 ```text
-取 token ─► 解析目标（wiki token ≠ doc id）─► 读现状 ─► 写内容 ─► md 上云 ─► 归档节点 ─► 写后核对
+token ─► resolve target (wiki token ≠ doc id) ─► read state ─► write ─► publish markdown ─► archive nodes ─► verify
 ```
 
-| 场景 | 关键端点 / 机制 |
-|:--|:--|
-| 改文档内容 | `PATCH /docx/v1/documents/{doc}/blocks/{block_id}` + `update_text_elements`（保留样式需整组 elements 回写） |
-| 插入 / 删除块 | `blocks/{parent}/children`（删块区间放 JSON body） |
-| md 上云 | 本地解析 md → 块数组 → 批量 children 写入（每批 ≤40，`index:-1`） |
-| 知识库归档 | 按天目录 `YYYY-MMDD`；`POST /wiki/v2/spaces/{space_id}/nodes`（`obj_type` 传字符串） |
-| 多维表格 | 字段改造、批量写记录、跨库搬迁（数字字段读回是字符串） |
-| 写后核对 | 回读云端块数 vs 本地解析块数，表格块（`block_type == 31`）数必须相等 |
-
-**实测坑精选**：`obj_type` 传数字报 field validation failed；分享面板默认搜不到机器人应用；单表上限 9 行、列宽要按内容算；md 里嵌套代码围栏会提前闭合；git-bash 裸调 API 需 `MSYS_NO_PATHCONV=1`；回读必须翻页。
-
-**资产**：`SKILL.md` + `references/`（8 篇）。
+Covers: block updates via `PATCH …/blocks/{block_id}` + `update_text_elements`; queue-style insert/delete via the children endpoint; style-preserving run-level replacement; markdown → Feishu block publishing (≤ 40 blocks per call, ≤ 9 rows per table, computed column widths); wiki node creation, moves, renames and per-day archive folders; bitable field work and cross-base migration; a permission and error-code table (131006 / 1770032 / 99991672 / 99992402 / 1254061); and mandatory post-write verification by re-reading block and table counts.
 
 ---
 
 <a id="doc-audit"></a>
 
-### 📐 7. 文档一致性审计 —— `doc-consistency-audit`
+### 📐 9. doc-consistency-audit
 
-**定位**：把「一批文档 / 多语言镜像到底有没有对齐」变成**机械层扫描 + 语义层抽查 + 分级报告**。
+**Focus**: mechanical scans first, semantic sampling second, then a severity-graded report with locatable evidence.
 
 ```text
-定范围与镜像对 ─► 机械层扫描（链接 / 代码块 / 占位残留 / 术语变体 / 版式）
-   ─► 语义层抽查（漏章、数字与配置、镜像内容指纹、图文对应）
-   ─► findings（文件 | 位置 | 类型 | 证据 | 严重级）
-   ─► 报告（🔴 阻断 / 🟡 需修 / 💡 建议）+ 已修正清单
+define scope + mirror pairs ─► mechanical scan (structure / links / code blocks / placeholders / terminology / layout)
+   ─► semantic sampling (missing sections, numbers vs config, mirror fingerprints, figure-text agreement)
+   ─► findings (file | location | type | evidence | severity) ─► report (🔴 / 🟡 / 💡) + fixed list
 ```
 
-**修复纪律**：确定性（错别字、链接编码、占位行、命令粘连）直接改；改一侧必须同步它的镜像版；语义/需业务判断的进「待确认」不擅改。
-
-**资产**：`SKILL.md` + `references/audit-checklist.md`（六类检查项 + 问题类型归一化枚举）+ `templates/audit-report.md`。
+**Fix discipline**: unambiguous problems (typos, link encoding, placeholders, glued commands) are fixed directly; whatever changes on one side of a mirror pair gets mirrored; semantic or judgement calls stay listed as "needs confirmation". Findings use a fixed type enum (`link-encoding`, `code-glue`, `mirror-mismatch`, …) so tallies stay countable.
 
 ---
 
 <a id="deliverable"></a>
 
-### 🗃️ 8. 交付物包 —— `deliverable-pack`
+### 🗃️ 10. deliverable-pack
 
-**定位**：同一件事有**三类读者**（决策者 / 执行者 / 复核者），用固定五件套一次满足。
+**Focus**: the same work has three readers — decision-maker, operator, auditor — served by a fixed five-part pack.
 
 ```text
-<产物类型>_<对象>_<YYYYMMDD_HHMM>/
-├─ 先读我_通俗总结.md      # 必出：1-2 屏，一句话结论 + 怎么用 + 文件地图
-├─ 00_主报告.md            # 结构化结论 + 证据（命令 + 输出/位置）
-├─ 01_执行日志.md          # 边做边写，禁止事后补
-├─ 02_问题与修复记录.md    # 原文 → 归因 → 修复位置 → 验证
-├─ 03_产物/                # 最终可用文件，保留原相对路径
-└─ 04_原始快照/            # 改动前原文 / commit，供 diff
+<artifact-type>_<subject>_<YYYYMMDD_HHMM>/
+├─ README-FIRST-overview.md   # required: 1-2 screens, one-sentence conclusion + file map
+├─ 00_main-report.md          # structured conclusions + evidence (command + output/location)
+├─ 01_execution-log.md        # appended as you go, never reconstructed
+├─ 02_problems-and-fixes.md   # raw error → root cause → fix location → verification
+├─ 03_artifacts/              # final usable files, original relative paths kept
+└─ 04_baseline-snapshot/      # pre-change files / commit, so the diff has a base
 ```
 
-**纪律**：结论先行；日志与总结分开；每条结论可复核；包内引用用相对路径；目录名带时间戳。
-
-**资产**：`SKILL.md`。
+**Discipline**: conclusions first; keep the log separate from the overview; every conclusion verifiable; relative paths inside the pack; timestamped directories.
 
 ---
 
 <a id="quickstart"></a>
 
-## 快速开始（Quick Start）
+## Quick Start
 
 ```bash
-# 方式一：作为 Hermes Agent 的 tap 订阅（可随时更新）
+# 1. Subscribe as a Hermes Agent tap (updatable)
 hermes skills tap add jjking619/open-skill
-hermes skills search 复现 --source github
-hermes skills install jjking619/open-skill/skills/doc-consistency-audit
+hermes skills search reproduce --source github
+hermes skills install jjking619/open-skill/skills/project-reproduction
 
-# 方式二：装到其他支持 Agent Skills 格式的客户端
+# 2. Install with any Agent Skills-compatible client
 npx skills add jjking619/open-skill
 
-# 方式三：整树复制进 Hermes Agent 技能目录
+# 3. Or copy the whole tree into the agent's skill directory
 git clone git@github.com:jjking619/open-skill.git
 cp -r open-skill/skills/*  ~/AppData/Local/hermes/skills/     # Windows (git-bash)
 cp -r open-skill/skills/*  ~/.hermes/skills/                  # Linux / macOS
 ```
 
-- **无需安装依赖**：技能是纯 Markdown 资产，命令按需在运行时执行。
-- **如何被加载**：Agent 依据每个 `SKILL.md` frontmatter 里的 `description`（含触发词）判断是否加载；也可手动 `skill_view(name='code-authoring')`。
-- **改回自己的环境**：技能里出现的产出目录（如复现报告、审计报告的落盘路径）按自己习惯改 `SKILL.md` 里的路径常量即可。
+- **No dependencies**: each skill is a plain markdown file; commands run at the moment they're needed.
+- **How skills load**: the agent reads each `SKILL.md` frontmatter `description` (trigger keywords) to decide relevance; you can also load one explicitly (`skill_view(name='code-authoring')`).
+- **Adapt to your environment**: output directories mentioned in a skill (report or audit paths) are plain text — edit the constant in `SKILL.md` to match your habits.
 
 <a id="layout"></a>
 
-## 仓库结构（Repository Layout）
+## Repository Layout
 
 ```text
 open-skill/
-├── README.md                                   # 本文件：技能门面与使用说明
+├── README.md                                   # this file: facade and usage
 ├── LICENSE                                     # MIT
 ├── .gitignore
 ├── .gitattributes
-└── skills/                                     # 每个技能一个目录，目录名 = SKILL.md 的 name（tap 规范）
-    ├── code-authoring/                         # ✍️ 代码编写
-    ├── github-repo-review-and-design/          # 🔍 代码审查 + 仓库文件设计（references ×4）
-    ├── project-reproduction/                   # 🧪 项目复现（templates ×1）
-    ├── prepublish-repo-audit/                  # 🚀 发布前审计
-    ├── windows-shell-tooling/                  # 🪟 Windows Shell 工具链
-    ├── shell-script-hardening/                 # 🔒 脚本健壮化
-    ├── adb-device-toolkit/                     # 📱 设备联调
-    ├── feishu-docs-api/                        # 📄 云文档 API（references ×8）
-    ├── doc-consistency-audit/                  # 📐 文档一致性审计（references ×1 + templates ×1）
-    └── deliverable-pack/                       # 🗃️ 交付物包
+└── skills/                                     # one directory per skill; the directory name equals the SKILL.md `name`
+    ├── code-authoring/SKILL.md
+    ├── github-repo-review-and-design/SKILL.md
+    ├── project-reproduction/SKILL.md
+    ├── prepublish-repo-audit/SKILL.md
+    ├── windows-shell-tooling/SKILL.md
+    ├── shell-script-hardening/SKILL.md
+    ├── adb-device-toolkit/SKILL.md
+    ├── feishu-docs-api/SKILL.md
+    ├── doc-consistency-audit/SKILL.md
+    └── deliverable-pack/SKILL.md
 ```
 
-目录层级与 Hermes Agent 技能库一致（`skills/<分类>/<技能名>/`），技能目录名等于 `SKILL.md` frontmatter 的 `name`，因此可以**整树复制**，无需改名或调整结构。
+The layout matches the Hermes Agent skill library and the Agent Skills tap convention (`skills/<skill-name>/SKILL.md`), so the tree can be copied wholesale without renaming anything.
 
 <a id="conventions"></a>
 
-## 设计约定（Conventions）
+## Conventions
 
-- **分层组织**：流程写 `SKILL.md`，清单与实测格式写 `references/`，产出物模板写 `templates/`。
-- **触发词面向意图**：描述用中性意图表述，换个人、换个项目依然能命中。
-- **结论必须可复核**：审查条目带 `文件:行`，复现步骤带命令与输出，API 断言带端点与错误码。
-- **修复要固化**：临时命令不算交付，改动必须落进文件本身。
-- **坑位只收通用经验**：条目须在他人环境下也成立；环境/团队特有条目不进技能。
-- **凭据不进仓库**：密钥、token、内部标识走环境变量，仓库里只留占位符。
-- **版本语义化**：每个技能自带 `version`，破坏性流程变更升 major。
+- **Single file per skill**: the procedure, the gotchas, and the acceptance checklist live together, so a skill never breaks on a missing companion file.
+- **Intent-shaped triggers**: descriptions use neutral intent ("reproduce per the tutorial"), not one conversation's phrasing.
+- **Verifiable conclusions**: review findings carry `file:line`, reproduction steps carry commands and real output, API claims carry endpoints and error codes.
+- **Fixes are permanent**: a one-off command is not a delivery — the change belongs in a file.
+- **Generic gotchas only**: an entry must hold in someone else's environment; environment- or team-specific items stay out.
+- **No credentials in the repo**: keys, tokens, and internal identifiers come from the environment; the repository holds placeholders.
+- **Semantic versions**: every skill carries a `version`; breaking process changes bump major.
 
 <a id="license"></a>
 
-## 许可（License）
+## License
 
-本项目采用 [MIT License](LICENSE)。
+Released under the [MIT License](LICENSE).
 
-<div align="center"><sub>Built for Hermes Agent · 技能随工作流一起演进</sub></div>
+<div align="center"><sub>Built for Hermes Agent · skills evolve with the work</sub></div>
