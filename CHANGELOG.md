@@ -16,7 +16,7 @@ Chinese edition (`SKILL.zh.md`) alongside it.
 ### Added
 
 - `code-authoring` v0.1.0 — comment hygiene (write *why*) and minimal-sufficient-diff discipline
-- `github-repo-review-and-design` v1.1.2 — whole-repo graded review plus repository layout design
+- `github-repo-review-and-design` v0.1.0 — whole-repo graded review plus repository layout design
 - `project-reproduction` v0.1.0 — reproduce or deploy a project from its own docs, fixing forward in files
 - `prepublish-repo-audit` v0.1.0 — pre-publish gate: visibility, secrets, internal identifiers, repo hygiene
 - `windows-shell-tooling` v0.1.0 — Windows + git-bash traps: paths, line endings, encoding, file writing

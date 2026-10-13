@@ -50,7 +50,7 @@ Code authoring · repo review · project reproduction · publish gate · shell &
 | Skill | Package / version | What it solves | Typical trigger |
 |:--|:--|:--|:--|
 | ✍️ **Code authoring** | `code-authoring`<br>`v0.1.0` | Comment hygiene (write *why*) plus **minimal sufficient diff** discipline, so a small change stays small | before writing new code or editing code you didn't just create |
-| 🔍 **Repo review & design** | `github-repo-review-and-design`<br>`v1.1.2` | **Whole-repo graded review** (assessment / release modes) and **file-structure design** for new projects | "is this repo worth using?", "design the layout for this demo" |
+| 🔍 **Repo review & design** | `github-repo-review-and-design`<br>`v0.1.0` | **Whole-repo graded review** (assessment / release modes) and **file-structure design** for new projects | "is this repo worth using?", "design the layout for this demo" |
 | 🧪 **Project reproduction** | `project-reproduction`<br>`v0.1.0` | Follow the README / tutorial / `install.sh` step by step, fix errors cheapest-path-first, make fixes permanent, deliver a report | "reproduce / deploy / get this project running" |
 | 🚀 **Pre-publish audit** | `prepublish-repo-audit`<br>`v0.1.0` | The **gate** before open-sourcing: visibility, secrets, internal identifiers, hygiene, history residue | "can this repo go public?", "audit before publishing" |
 | 🪟 **Windows shell** | `windows-shell-tooling`<br>`v0.1.0` | Windows + git-bash traps: path conversion, CRLF/LF, escaping, GBK console, pty line endings | a command misbehaves under git-bash |

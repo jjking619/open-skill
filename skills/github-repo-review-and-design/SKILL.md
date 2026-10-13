@@ -1,7 +1,7 @@
 ---
 name: github-repo-review-and-design
 description: "Review a whole GitHub repository and produce a graded report, or design the file structure for a new open-source demo or project. Covers repository assessment, layered code review, automated scans, release-readiness checks, and layout templates. Use for repo triage, selection, or project scaffolding."
-version: 1.1.2
+version: 0.1.0
 author: "kane.ji"
 license: MIT
 platforms: [windows, linux, macos]
